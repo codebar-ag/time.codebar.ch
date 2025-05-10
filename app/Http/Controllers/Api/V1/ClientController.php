@@ -50,7 +50,7 @@ class ClientController extends Controller
             $clientsQuery->whereNull('archived_at');
         }
 
-        $clients = $clientsQuery->paginate(config('app.pagination_per_page_default'));
+        $clients = $clientsQuery->orderBy('name')->paginate(config('app.pagination_per_page_default'));
 
         return new ClientCollection($clients);
     }
