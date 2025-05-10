@@ -36,10 +36,15 @@ async function createClient(
     return await useClientsStore().createClient(client);
 }
 const { clients } = storeToRefs(useClientsStore());
+
 const gridTemplate = computed(() => {
     return `grid-template-columns: minmax(300px, 1fr) minmax(150px, auto) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} minmax(120px, auto) 80px;`;
 });
 import { isAllowedToPerformPremiumAction } from '@/utils/billing';
+
+const sortedProjects = computed(() => {
+  return [...props.projects].sort((a, b) => a.name.localeCompare(b.name));
+});
 </script>
 
 <template>
@@ -86,7 +91,7 @@ import { isAllowedToPerformPremiumAction } from '@/utils/billing';
                         >Create your First Project
                     </SecondaryButton>
                 </div>
-                <template v-for="project in projects" :key="project.id">
+                <template v-for="project in sortedProjects" :key="project.id">
                     <ProjectTableRow
                         :show-billable-rate="props.showBillableRate"
                         :project="project"></ProjectTableRow>

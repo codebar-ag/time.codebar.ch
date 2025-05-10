@@ -60,7 +60,7 @@ class ProjectController extends Controller
             $projectsQuery->whereNull('archived_at');
         }
 
-        $projects = $projectsQuery->orderBy('name')->paginate(config('app.pagination_per_page_default'));
+        $projects = $projectsQuery->paginate(config('app.pagination_per_page_default'));
 
         $showBillableRate = $this->member($organization)->role !== Role::Employee->value || $organization->employees_can_see_billable_rates;
 
