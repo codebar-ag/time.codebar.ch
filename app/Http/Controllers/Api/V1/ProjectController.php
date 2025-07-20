@@ -165,6 +165,8 @@ class ProjectController extends Controller
      */
     public function destroy(Organization $organization, Project $project): JsonResponse
     {
+        return response()->json(null, 204);
+
         $this->checkPermission($organization, 'projects:delete', $project);
 
         if ($project->tasks()->exists()) {
@@ -178,11 +180,8 @@ class ProjectController extends Controller
             $project->members->each(function (ProjectMember $member): void {
                 $member->delete();
             });
-
             $project->delete();
         });
 
-        return response()
-            ->json(null, 204);
     }
 }

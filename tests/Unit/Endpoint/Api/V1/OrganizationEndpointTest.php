@@ -260,4 +260,119 @@ class OrganizationEndpointTest extends ApiEndpointTestAbstract
             'billable_rate' => $organizationFake->billable_rate,
         ]);
     }
+
+    public function test_get_counts_endpoint_fails_if_user_has_no_permission_to_view_organizations(): void
+    {
+        // Arrange
+        $data = $this->createUserWithPermission();
+        Passport::actingAs($data->user);
+
+        // Act
+        $response = $this->getJson(route('api.v1.organizations.counts', [$data->organization->getKey()]));
+
+        // Assert
+        $response->assertForbidden();
+    }
+
+    public function test_get_counts_endpoint_returns_zero_counts_for_empty_organization(): void
+    {
+        // Arrange
+        $data = $this->createUserWithPermission([
+            'organizations:view',
+        ]);
+        Passport::actingAs($data->user);
+
+        // Act
+        $response = $this->getJson(route('api.v1.organizations.counts', [$data->organization->getKey()]));
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'projects' => 0,
+                'clients' => 0,
+                'members' => 2,
+                'tags' => 0,
+            ],
+        ]);
+    }
+
+    public function test_get_counts_endpoint_returns_correct_counts_with_data(): void
+    {
+        // Arrange
+        $data = $this->createUserWithPermission([
+            'organizations:view',
+        ]);
+        Passport::actingAs($data->user);
+
+        // Create test data
+        $clients = \App\Models\Client::factory()->count(3)->for($data->organization)->create();
+        $projects = \App\Models\Project::factory()->count(5)->for($data->organization)->create();
+        $tags = \App\Models\Tag::factory()->count(2)->for($data->organization)->create();
+        $additionalMembers = \App\Models\Member::factory()->count(2)->for($data->organization)->create();
+
+        // Act
+        $response = $this->getJson(route('api.v1.organizations.counts', [$data->organization->getKey()]));
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'projects' => 5,
+                'clients' => 3,
+                'members' => 4,
+                'tags' => 2,
+            ],
+        ]);
+    }
+
+    public function test_get_counts_endpoint_excludes_archived_items(): void
+    {
+        // Arrange
+        $data = $this->createUserWithPermission([
+            'organizations:view',
+        ]);
+        Passport::actingAs($data->user);
+
+        // Create active items
+        $activeClients = \App\Models\Client::factory()->count(2)->for($data->organization)->create();
+        $activeProjects = \App\Models\Project::factory()->count(3)->for($data->organization)->create();
+
+        // Create archived items
+        $archivedClients = \App\Models\Client::factory()->count(2)->for($data->organization)->create([
+            'archived_at' => now(),
+        ]);
+        $archivedProjects = \App\Models\Project::factory()->count(1)->for($data->organization)->create([
+            'archived_at' => now(),
+        ]);
+
+        // Act
+        $response = $this->getJson(route('api.v1.organizations.counts', [$data->organization->getKey()]));
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'projects' => 3, // Only active projects
+                'clients' => 2,  // Only active clients
+                'members' => 2,  // Owner + test user (members are not archived)
+                'tags' => 0,     // No tags created
+            ],
+        ]);
+    }
+
+    public function test_get_counts_endpoint_fails_with_not_found_if_id_is_not_uuid(): void
+    {
+        // Arrange
+        $data = $this->createUserWithPermission([
+            'organizations:view',
+        ]);
+        Passport::actingAs($data->user);
+
+        // Act
+        $response = $this->getJson(route('api.v1.organizations.counts', ['not-uuid']));
+
+        // Assert
+        $response->assertNotFound();
+    }
 }
