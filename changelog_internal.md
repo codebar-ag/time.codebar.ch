@@ -318,6 +318,48 @@ filteredProjects = filteredProjects.filter((project) => {
 - Lookups: O(1) per project instead of O(m)
 - Significant improvement with large datasets
 
+### CSS Cleanup: Remove Redundant Tailwind Classes
+
+Fixed duplicate and redundant CSS class declarations across all table components throughout the application.
+
+**Problem:** Many table components had duplicate `3xl:pl-12` classes in their Tailwind CSS declarations
+- Some had simple duplicates: `pl-4 sm:pl-6 lg:pl-8 3xl:pl-12` (redundant `3xl:pl-12`)
+- Some had double duplicates: `3xl:pl-12 ... pl-4 sm:pl-6 lg:pl-8 3xl:pl-12` (appearing twice!)
+
+**Files cleaned up:**
+- `resources/js/Components/Common/Client/ClientTableRow.vue`
+- `resources/js/Components/Common/Client/ClientTableHeading.vue`
+- `resources/js/Components/Common/Tag/TagTableHeading.vue`
+- `resources/js/Components/Common/Tag/TagTableRow.vue`
+- `resources/js/Components/Common/ProjectMember/ProjectMemberTableHeading.vue`
+- `resources/js/Components/Common/ProjectMember/ProjectMemberTableRow.vue`
+- `resources/js/Components/Common/Invitation/InvitationTableRow.vue`
+- `resources/js/Components/Common/Invitation/InvitationTableHeading.vue`
+- `resources/js/Components/Common/Report/ReportTableHeading.vue`
+- `resources/js/Components/Common/Report/ReportTableRow.vue`
+- `resources/js/Components/Common/Member/MemberTableRow.vue`
+- `resources/js/Components/Common/Member/MemberTableHeading.vue`
+- `resources/js/Components/Common/Project/ProjectTableRow.vue`
+- `resources/js/Components/Common/Project/ProjectTableHeading.vue`
+- `resources/js/Components/Common/Task/TaskTableHeading.vue`
+- `resources/js/Components/Common/Task/TaskTableRow.vue`
+
+**Changes made:**
+```css
+/* Before - redundant classes */
+class="... pl-4 sm:pl-6 lg:pl-8 3xl:pl-12"
+class="... 3xl:pl-12 ... pl-4 sm:pl-6 lg:pl-8 3xl:pl-12"
+
+/* After - clean responsive padding */
+class="... pl-4 sm:pl-6 lg:pl-8"
+```
+
+**Benefits:**
+- Cleaner, more maintainable CSS
+- Eliminates potential conflicts from duplicate declarations
+- Consistent responsive padding across all table components
+- Smaller CSS bundle size
+
 ### Fix Client Table Column Positioning
 
 Fixed layout issue where Projects column had excessive spacing from Name column.
