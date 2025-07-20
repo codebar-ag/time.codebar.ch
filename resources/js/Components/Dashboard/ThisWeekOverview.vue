@@ -66,6 +66,19 @@ const organizationId = computed(() => getCurrentOrganizationId());
 
 const organization = inject<ComputedRef<Organization>>('organization');
 
+// Set up the queries
+const { data: weeklyProjectOverview } = useQuery({
+    queryKey: ['weeklyProjectOverview', organizationId],
+    queryFn: () => {
+        return api.weeklyProjectOverview({
+            params: {
+                organization: organizationId.value!,
+            },
+        });
+    },
+    enabled: computed(() => !!organizationId.value),
+});
+
 const { data: totalWeeklyTime } = useQuery({
     queryKey: ['totalWeeklyTime', organizationId],
     queryFn: () => {

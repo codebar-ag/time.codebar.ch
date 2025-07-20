@@ -5,7 +5,6 @@ import { ChartBarIcon } from '@heroicons/vue/20/solid';
 import ReportingChart from '@/Components/Common/Reporting/ReportingChart.vue';
 import { formatHumanReadableDuration } from '@/packages/ui/src/utils/time';
 import ReportingRow from '@/Components/Common/Reporting/ReportingRow.vue';
-import ReportingPieChart from '@/Components/Common/Reporting/ReportingPieChart.vue';
 import { formatCents } from '@/packages/ui/src/utils/money';
 import type { CurrencyFormat } from '@/packages/ui/src/utils/money';
 import { computed, onMounted, provide, ref } from 'vue';
@@ -119,30 +118,6 @@ const subGroup = computed(() => {
 });
 const { emptyPlaceholder } = useReportingStore();
 
-const groupedPieChartData = computed(() => {
-    return (
-        aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
-            if (entry.description === null) {
-                return {
-                    value: entry.seconds,
-                    name: emptyPlaceholder[
-                        aggregatedTableTimeEntries.value?.grouped_type ??
-                            'project'
-                    ],
-                    color: '#CCCCCC',
-                };
-            }
-            return {
-                value: entry.seconds,
-                name: entry.description,
-                color:
-                    entry.color ??
-                    getRandomColorWithSeed(entry.description ?? 'none'),
-            };
-        }) ?? []
-    );
-});
-
 const tableData = computed(() => {
     return aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
         return {
@@ -200,56 +175,50 @@ onMounted(async () => {
             </div>
         </MainContainer>
         <MainContainer>
-            <div class="sm:grid grid-cols-4 pt-6 items-start">
+            <div class="pt-6 items-start">
                 <div
-                    class="col-span-3 bg-card-background rounded-lg border border-card-border pt-3">
+                    class="bg-card-background rounded-lg border border-card-border pt-3">
                     <div
-                        class="text-sm flex text-text-primary items-center font-medium px-6 border-b border-card-background-separator pb-3">
-                        Group by
-                        <strong class="px-2">{{ getGroupLabel(group) }}</strong>
-                        and
-                        <strong class="px-2">{{
-                            getGroupLabel(subGroup)
-                        }}</strong>
+                        class="text-sm flex text-text-primary items-center space-x-3 font-medium px-6 border-b border-card-background-separator pb-3">
+                        <span>{{ sharedReportResponseData?.name }}</span>
                     </div>
-                    <div
-                        class="grid items-center"
-                        style="grid-template-columns: 1fr 100px 150px">
-                        <div
-                            class="contents [&>*]:border-card-background-separator [&>*]:border-b [&>*]:bg-tertiary [&>*]:pb-1.5 [&>*]:pt-1 text-text-secondary text-sm">
-                            <div class="pl-6">Name</div>
-                            <div class="text-right">Duration</div>
-                            <div class="text-right pr-6">Cost</div>
-                        </div>
+                    <div class="px-6 pt-6 pb-3">
                         <template
-                            v-if="
-                                aggregatedTableTimeEntries?.grouped_data &&
-                                aggregatedTableTimeEntries.grouped_data
-                                    ?.length > 0
-                            ">
+                            v-for="reportingRowEntry in aggregatedTableTimeEntries?.grouped_data"
+                            :key="reportingRowEntry.key">
                             <ReportingRow
-                                v-for="entry in tableData"
-                                :key="entry.description ?? 'none'"
-                                :currency="reportCurrency"
-                                :currency-format="reportCurrencyFormat"
-                                :entry="entry"></ReportingRow>
-                            <div
-                                class="contents [&>*]:transition text-text-tertiary [&>*]:h-[50px]">
-                                <div class="flex items-center pl-6 font-medium">
-                                    <span>Total</span>
-                                </div>
-                                <div
-                                    class="justify-end flex items-center font-medium">
+                                :reporting-row-entry="reportingRowEntry"
+                                :grouped-type="
+                                    aggregatedTableTimeEntries?.grouped_type
+                                "
+                                :show-seconds="false"
+                                :group="group"
+                                :sub-group="subGroup"></ReportingRow>
+                        </template>
+                        <div
+                            v-if="
+                                aggregatedTableTimeEntries &&
+                                aggregatedTableTimeEntries.grouped_data.length >
+                                    0
+                            "
+                            class="border-t border-background-separator pt-3 mt-6 text-sm space-y-2">
+                            <div class="justify-between items-center flex">
+                                <div class="font-medium">Total</div>
+                                <div class="font-medium">
                                     {{
                                         formatHumanReadableDuration(
                                             aggregatedTableTimeEntries.seconds,
                                             reportIntervalFormat,
-                                            reportNumberFormat
+                                            'german'
                                         )
                                     }}
                                 </div>
-                                <div
-                                    class="justify-end pr-6 flex items-center font-medium">
+                            </div>
+                            <div
+                                v-if="aggregatedTableTimeEntries.cost !== null"
+                                class="justify-between items-center flex">
+                                <div class="font-medium">Total Billable</div>
+                                <div class="justify-end pr-6 flex items-center font-medium">
                                     {{
                                         formatCents(
                                             aggregatedTableTimeEntries.cost,
@@ -260,20 +229,16 @@ onMounted(async () => {
                                     }}
                                 </div>
                             </div>
-                        </template>
+                        </div>
                         <div
                             v-else
-                            class="chart flex flex-col items-center justify-center py-12 col-span-3">
+                            class="chart flex flex-col items-center justify-center py-12">
                             <p class="text-lg text-text-primary font-semibold">
                                 No time entries found
                             </p>
                             <p>Try to change the filters and time range</p>
                         </div>
                     </div>
-                </div>
-                <div class="px-2 lg:px-4">
-                    <ReportingPieChart
-                        :data="groupedPieChartData"></ReportingPieChart>
                 </div>
             </div>
         </MainContainer>
