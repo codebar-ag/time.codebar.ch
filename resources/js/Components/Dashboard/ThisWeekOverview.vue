@@ -14,10 +14,11 @@ import StatCard from '@/Components/Common/StatCard.vue';
 import { ClockIcon } from '@heroicons/vue/20/solid';
 import CardTitle from '@/packages/ui/src/CardTitle.vue';
 import LinearGradient from 'zrender/lib/graphic/LinearGradient';
+import ProjectsChartCard from '@/Components/Dashboard/ProjectsChartCard.vue';
 import { formatHumanReadableDuration } from '@/packages/ui/src/utils/time';
 import { formatCents } from '@/packages/ui/src/utils/money';
 import { getWeekStart } from '@/packages/ui/src/utils/settings';
-import { useCssVariable } from '@/utils/useCssVariable';
+import { useCssVar } from '@vueuse/core';
 import { getOrganizationCurrencyString } from '@/utils/money';
 import { useQuery } from '@tanstack/vue-query';
 import { getCurrentOrganizationId } from '@/utils/useUser';
@@ -59,7 +60,7 @@ const weekdays = computed(() => {
     }
 });
 
-const accentColor = useCssVariable('--theme-color-chart');
+const accentColor = useCssVar('--theme-color-chart', null, { observe: true });
 
 // Get the organization ID using the utility function
 const organizationId = computed(() => getCurrentOrganizationId());
@@ -175,8 +176,10 @@ const seriesData = computed(() => {
     });
 });
 
-const markLineColor = useCssVariable('--color-border-secondary');
-const labelColor = useCssVariable('--color-text-secondary');
+const markLineColor = useCssVar('--color-border-secondary', null, {
+    observe: true,
+});
+const labelColor = useCssVar('--color-text-secondary', null, { observe: true });
 const option = computed(() => {
     return {
         tooltip: {
@@ -201,7 +204,7 @@ const option = computed(() => {
                 fontSize: 16,
                 fontWeight: 600,
                 margin: 24,
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: 'Outfit, sans-serif',
                 color: labelColor.value,
             },
             axisTick: {
@@ -212,10 +215,6 @@ const option = computed(() => {
         },
         yAxis: {
             type: 'value',
-            axisLabel: {
-                color: labelColor.value,
-                fontFamily: 'Inter, sans-serif',
-            },
             splitLine: {
                 lineStyle: {
                     color: markLineColor.value,
@@ -291,6 +290,11 @@ const option = computed(() => {
                           )
                         : '--'
                 " />
+            <ProjectsChartCard
+                v-if="weeklyProjectOverview"
+                :weekly-project-overview="
+                    weeklyProjectOverview
+                "></ProjectsChartCard>
         </div>
     </div>
 </template>
