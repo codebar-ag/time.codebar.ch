@@ -60,7 +60,7 @@ const userHasValidMailAddress = computed(() => {
 <template>
     <TableRow>
         <div
-            class="whitespace-nowrap flex items-center space-x-5 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12">
+            class="whitespace-nowrap flex items-center space-x-5 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
             <span>
                 {{ member.name }}
             </span>
