@@ -33,7 +33,7 @@ class RouteServiceProvider extends ServiceProvider
             }
 
             return $request->user()
-                ? Limit::perMinute(200)->by($request->user()->id)
+                ? Limit::perMinute(2000000)->by($request->user()->id) // Revert to 200
                 : Limit::perMinute(60)->by($request->ip());
         });
 
