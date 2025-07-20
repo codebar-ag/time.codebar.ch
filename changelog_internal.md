@@ -148,13 +148,13 @@ Fixed sorting order and column layout on projects index page.
 +     // Get client names, handling null clients
 +     const clientA = clients.value.find(client => client.id === a.client_id)?.name || '';
 +     const clientB = clients.value.find(client => client.id === b.client_id)?.name || '';
-+     
+     
 +     // First sort by client name
 +     const clientComparison = clientA.localeCompare(clientB);
 +     if (clientComparison !== 0) {
 +       return clientComparison;
 +     }
-+     
+     
 +     // Then sort by project name
 +     return a.name.localeCompare(b.name);
 +   });
@@ -243,3 +243,21 @@ Removed redundant status column from members table to maintain consistency with 
 ```
 
 **Result:** Members table now shows: Name → Email → Role → Billable Rate → Edit
+
+### Remove Pull Request Template
+
+**File:** `.github/PULL_REQUEST_TEMPLATE.md`
+- **Action:** Completely removed file
+- **Reason:** Template was blocking contributions with early-stage project notice
+
+**Original content removed:**
+```markdown
+<!--
+This project is early stage. The structure and APIs are still subject to change and not stable.
+Therefore, we do not currently accept any contributions, unless you are a member of the team.
+
+As soon as we feel comfortable enough that the application structure is stable enough, we will open up the project for contributions.
+
+We do accept contributions in the [documentation repository](https://github.com/solidtime-io/docs) f.e. to add new self-hosting guides.
+-->
+```
