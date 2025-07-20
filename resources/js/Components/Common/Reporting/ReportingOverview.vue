@@ -237,42 +237,6 @@ const { projects } = storeToRefs(projectsStore);
 const showExportModal = ref(false);
 const exportUrl = ref<string | null>(null);
 
-const groupedPieChartData = computed(() => {
-    return (
-        aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
-            const name = getNameForReportingRowEntry(
-                entry.key,
-                aggregatedTableTimeEntries.value?.grouped_type
-            );
-            let color = getRandomColorWithSeed(entry.key ?? 'none');
-            if (
-                name &&
-                aggregatedTableTimeEntries.value?.grouped_type &&
-                emptyPlaceholder[
-                    aggregatedTableTimeEntries.value?.grouped_type
-                ] === name
-            ) {
-                color = '#CCCCCC';
-            } else if (
-                aggregatedTableTimeEntries.value?.grouped_type === 'project'
-            ) {
-                color =
-                    projects.value?.find((project) => project.id === entry.key)
-                        ?.color ?? '#CCCCCC';
-            }
-            return {
-                value: entry.seconds,
-                name:
-                    getNameForReportingRowEntry(
-                        entry.key,
-                        aggregatedTableTimeEntries.value?.grouped_type
-                    ) ?? '',
-                color: color,
-            };
-        }) ?? []
-    );
-});
-
 const tableData = computed(() => {
     return aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
         return {

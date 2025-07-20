@@ -118,30 +118,6 @@ const subGroup = computed(() => {
 });
 const { emptyPlaceholder } = useReportingStore();
 
-const groupedPieChartData = computed(() => {
-    return (
-        aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
-            if (entry.description === null) {
-                return {
-                    value: entry.seconds,
-                    name: emptyPlaceholder[
-                        aggregatedTableTimeEntries.value?.grouped_type ??
-                            'project'
-                    ],
-                    color: '#CCCCCC',
-                };
-            }
-            return {
-                value: entry.seconds,
-                name: entry.description,
-                color:
-                    entry.color ??
-                    getRandomColorWithSeed(entry.description ?? 'none'),
-            };
-        }) ?? []
-    );
-});
-
 const tableData = computed(() => {
     return aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
         return {
