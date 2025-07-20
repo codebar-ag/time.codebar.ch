@@ -148,13 +148,13 @@ Fixed sorting order and column layout on projects index page.
 +     // Get client names, handling null clients
 +     const clientA = clients.value.find(client => client.id === a.client_id)?.name || '';
 +     const clientB = clients.value.find(client => client.id === b.client_id)?.name || '';
-     
++     
 +     // First sort by client name
 +     const clientComparison = clientA.localeCompare(clientB);
 +     if (clientComparison !== 0) {
 +       return clientComparison;
 +     }
-     
++     
 +     // Then sort by project name
 +     return a.name.localeCompare(b.name);
 +   });
@@ -189,3 +189,57 @@ Fixed sorting order and column layout on projects index page.
       <!-- project name content -->
   </div>
 ```
+
+### Fix Projects Table Column Widths
+
+Fixed layout issue where Client column was too wide after column reordering.
+
+**File:** `resources/js/Components/Common/Project/ProjectTable.vue`
+- **Fixed:** Grid template to make Client column smaller and Name column flexible
+```js
+- return `grid-template-columns: minmax(300px, 1fr) minmax(150px, auto) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} 80px;`;
++ return `grid-template-columns: minmax(150px, auto) minmax(300px, 1fr) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} 80px;`;
+```
+
+**Result:** Client column now has `minmax(150px, auto)` and Name column gets the flexible `minmax(300px, 1fr)` width.
+
+### Fix Clients Table Missing Header
+
+Added missing "Projects" header to the second column in clients table.
+
+**File:** `resources/js/Components/Common/Client/ClientTableHeading.vue`
+- **Added:** "Projects" header text to previously empty column
+```vue
+- <div class="px-3 py-1.5 text-left font-semibold text-text-primary"></div>
++ <div class="px-3 py-1.5 text-left font-semibold text-text-primary">Projects</div>
+```
+
+### Remove Status Column from Members Table
+
+Removed redundant status column from members table to maintain consistency with projects and clients tables.
+
+**File:** `resources/js/Components/Common/Member/MemberTableHeading.vue`
+- **Removed:** Status column header
+```vue
+- <div class="px-3 py-1.5 text-left font-semibold text-text-primary">Status</div>
+```
+
+**File:** `resources/js/Components/Common/Member/MemberTableRow.vue`
+- **Removed:** Status column showing Active/Inactive based on placeholder status
+```vue
+- <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary flex space-x-1 items-center font-medium">
+-     <CheckCircleIcon v-if="member.is_placeholder === false" class="w-5"></CheckCircleIcon>
+-     <span v-if="member.is_placeholder === false">Active</span>
+-     <UserCircleIcon v-if="member.is_placeholder === true" class="w-5"></UserCircleIcon>
+-     <span v-if="member.is_placeholder === true">Inactive</span>
+- </div>
+```
+
+**File:** `resources/js/Components/Common/Member/MemberTable.vue`
+- **Updated:** Grid template from 6 columns to 5 columns
+```vue
+- style="grid-template-columns: 1fr 1fr 180px 180px 150px 130px"
++ style="grid-template-columns: 1fr 1fr 180px 180px 130px"
+```
+
+**Result:** Members table now shows: Name → Email → Role → Billable Rate → Edit
