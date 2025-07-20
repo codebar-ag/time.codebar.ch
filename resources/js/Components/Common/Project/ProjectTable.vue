@@ -38,12 +38,25 @@ async function createClient(
 const { clients } = storeToRefs(useClientsStore());
 
 const gridTemplate = computed(() => {
-    return `grid-template-columns: minmax(300px, 1fr) minmax(150px, auto) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} minmax(120px, auto) 80px;`;
+    return `grid-template-columns: minmax(300px, 1fr) minmax(150px, auto) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} 80px;`;
 });
 import { isAllowedToPerformPremiumAction } from '@/utils/billing';
 
 const sortedProjects = computed(() => {
-  return [...props.projects].sort((a, b) => a.name.localeCompare(b.name));
+  return [...props.projects].sort((a, b) => {
+    // Get client names, handling null clients
+    const clientA = clients.value.find(client => client.id === a.client_id)?.name || '';
+    const clientB = clients.value.find(client => client.id === b.client_id)?.name || '';
+    
+    // First sort by client name
+    const clientComparison = clientA.localeCompare(clientB);
+    if (clientComparison !== 0) {
+      return clientComparison;
+    }
+    
+    // Then sort by project name
+    return a.name.localeCompare(b.name);
+  });
 });
 </script>
 

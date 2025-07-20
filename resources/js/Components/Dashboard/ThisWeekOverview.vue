@@ -14,7 +14,6 @@ import StatCard from '@/Components/Common/StatCard.vue';
 import { ClockIcon } from '@heroicons/vue/20/solid';
 import CardTitle from '@/packages/ui/src/CardTitle.vue';
 import LinearGradient from 'zrender/lib/graphic/LinearGradient';
-import ProjectsChartCard from '@/Components/Dashboard/ProjectsChartCard.vue';
 import { formatHumanReadableDuration } from '@/packages/ui/src/utils/time';
 import { formatCents } from '@/packages/ui/src/utils/money';
 import { getWeekStart } from '@/packages/ui/src/utils/settings';
@@ -66,19 +65,6 @@ const accentColor = useCssVariable('--theme-color-chart');
 const organizationId = computed(() => getCurrentOrganizationId());
 
 const organization = inject<ComputedRef<Organization>>('organization');
-
-// Set up the queries
-const { data: weeklyProjectOverview } = useQuery({
-    queryKey: ['weeklyProjectOverview', organizationId],
-    queryFn: () => {
-        return api.weeklyProjectOverview({
-            params: {
-                organization: organizationId.value!,
-            },
-        });
-    },
-    enabled: computed(() => !!organizationId.value),
-});
 
 const { data: totalWeeklyTime } = useQuery({
     queryKey: ['totalWeeklyTime', organizationId],
@@ -292,11 +278,6 @@ const option = computed(() => {
                           )
                         : '--'
                 " />
-            <ProjectsChartCard
-                v-if="weeklyProjectOverview"
-                :weekly-project-overview="
-                    weeklyProjectOverview
-                "></ProjectsChartCard>
         </div>
     </div>
 </template>

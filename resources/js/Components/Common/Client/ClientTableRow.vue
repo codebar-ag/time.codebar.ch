@@ -51,11 +51,6 @@ const showEditModal = ref(false);
             <span class="text-text-secondary"> {{ projectCount }} Projects </span>
         </div>
         <div
-            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary flex space-x-1 items-center font-medium">
-            <CheckCircleIcon class="w-5"></CheckCircleIcon>
-            <span>Active</span>
-        </div>
-        <div
             class="relative whitespace-nowrap flex items-center pl-3 text-right text-sm font-medium sm:pr-0 pr-4 sm:pr-6 lg:pr-8 3xl:pr-12">
             <ClientMoreOptionsDropdown
                 :client="client"

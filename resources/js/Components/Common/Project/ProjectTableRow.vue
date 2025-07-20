@@ -76,7 +76,16 @@ const showEditProjectModal = ref(false);
         :original-project="project"></ProjectEditModal>
     <TableRow :href="route('projects.show', { project: project.id })">
         <div
-            class="whitespace-nowrap min-w-0 flex items-center space-x-5 3xl:pl-12 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12">
+            class="whitespace-nowrap min-w-0 px-3 py-4 text-sm text-text-secondary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12">
+            <div
+                v-if="project.client_id"
+                class="overflow-ellipsis overflow-hidden">
+                {{ client?.name }}
+            </div>
+            <div v-else>No client</div>
+        </div>
+        <div
+            class="whitespace-nowrap min-w-0 flex items-center space-x-5 py-4 pr-3 text-sm font-medium text-text-primary">
             <div
                 :style="{
                     backgroundColor: project.color,
@@ -89,15 +98,6 @@ const showEditProjectModal = ref(false);
             <span class="text-text-secondary">
                 {{ projectTasksCount }} Tasks
             </span>
-        </div>
-        <div
-            class="whitespace-nowrap min-w-0 px-3 py-4 text-sm text-text-secondary">
-            <div
-                v-if="project.client_id"
-                class="overflow-ellipsis overflow-hidden">
-                {{ client?.name }}
-            </div>
-            <div v-else>No client</div>
         </div>
         <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
             <div v-if="project.spent_time">
@@ -125,11 +125,6 @@ const showEditProjectModal = ref(false);
             v-if="showBillableRate"
             class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
             {{ billableRateInfo }}
-        </div>
-        <div
-            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary flex space-x-1 items-center font-medium">
-            <CheckCircleIcon class="w-5"></CheckCircleIcon>
-            <span>Active</span>
         </div>
         <div
             class="relative whitespace-nowrap flex items-center pl-3 text-right text-sm font-medium pr-4 sm:pr-6 lg:pr-8 3xl:pr-12">
