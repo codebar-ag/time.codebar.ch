@@ -16,7 +16,6 @@ import {
 import { formatCents } from '@/packages/ui/src/utils/money';
 import ReportingTabNavbar from '@/Components/Common/Reporting/ReportingTabNavbar.vue';
 import ReportingExportButton from '@/Components/Common/Reporting/ReportingExportButton.vue';
-import ReportingRoundingControls from '@/Components/Common/Reporting/ReportingRoundingControls.vue';
 import TaskMultiselectDropdown from '@/Components/Common/Task/TaskMultiselectDropdown.vue';
 import ClientMultiselectDropdown from '@/Components/Common/Client/ClientMultiselectDropdown.vue';
 import ReportingRow from '@/Components/Common/Reporting/ReportingRow.vue';
@@ -32,8 +31,9 @@ import DateRangePicker from '@/packages/ui/src/Input/DateRangePicker.vue';
 import ReportingExportModal from '@/Components/Common/Reporting/ReportingExportModal.vue';
 import ReportSaveButton from '@/Components/Common/Report/ReportSaveButton.vue';
 import TagDropdown from '@/packages/ui/src/Tag/TagDropdown.vue';
+import ReportingPieChart from '@/Components/Common/Reporting/ReportingPieChart.vue';
 
-import { computed, type ComputedRef, inject, onMounted, ref, watch } from 'vue';
+import { computed, type ComputedRef, inject, onMounted, ref } from 'vue';
 import { type GroupingOption, useReportingStore } from '@/utils/useReporting';
 import { storeToRefs } from 'pinia';
 import {
@@ -54,9 +54,6 @@ import type { ExportFormat } from '@/types/reporting';
 import { getRandomColorWithSeed } from '@/packages/ui/src/utils/color';
 import { useProjectsStore } from '@/utils/useProjects';
 
-// TimeEntryRoundingType is now defined in ReportingRoundingControls component
-type TimeEntryRoundingType = 'up' | 'down' | 'nearest';
-
 const { handleApiRequestNotifications } = useNotificationsStore();
 
 const startDate = useSessionStorage<string>(
@@ -74,9 +71,6 @@ const selectedTasks = ref<string[]>([]);
 const selectedClients = ref<string[]>([]);
 
 const billable = ref<'true' | 'false' | null>(null);
-const roundingEnabled = ref<boolean>(false);
-const roundingType = ref<TimeEntryRoundingType>('nearest');
-const roundingMinutes = ref<number>(15);
 
 const group = useStorage<GroupingOption>('reporting-group', 'project');
 const subGroup = useStorage<GroupingOption>('reporting-sub-group', 'task');
@@ -89,11 +83,6 @@ const { aggregatedGraphTimeEntries, aggregatedTableTimeEntries } =
 const { groupByOptions } = reportingStore;
 
 const organization = inject<ComputedRef<Organization>>('organization');
-
-// Watch rounding enabled state to trigger updates
-watch(roundingEnabled, () => {
-    updateReporting();
-});
 
 function getFilterAttributes(): AggregatedTimeEntriesQueryParams {
     let params: AggregatedTimeEntriesQueryParams = {
@@ -122,8 +111,6 @@ function getFilterAttributes(): AggregatedTimeEntriesQueryParams {
             getCurrentRole() === 'employee'
                 ? getCurrentMembershipId()
                 : undefined,
-        rounding_type: roundingEnabled.value ? roundingType.value : undefined,
-        rounding_minutes: roundingEnabled.value ? roundingMinutes.value : undefined,
     };
     return params;
 }
@@ -237,6 +224,42 @@ const { projects } = storeToRefs(projectsStore);
 const showExportModal = ref(false);
 const exportUrl = ref<string | null>(null);
 
+const groupedPieChartData = computed(() => {
+    return (
+        aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
+            const name = getNameForReportingRowEntry(
+                entry.key,
+                aggregatedTableTimeEntries.value?.grouped_type
+            );
+            let color = getRandomColorWithSeed(entry.key ?? 'none');
+            if (
+                name &&
+                aggregatedTableTimeEntries.value?.grouped_type &&
+                emptyPlaceholder[
+                    aggregatedTableTimeEntries.value?.grouped_type
+                ] === name
+            ) {
+                color = '#CCCCCC';
+            } else if (
+                aggregatedTableTimeEntries.value?.grouped_type === 'project'
+            ) {
+                color =
+                    projects.value?.find((project) => project.id === entry.key)
+                        ?.color ?? '#CCCCCC';
+            }
+            return {
+                value: entry.seconds,
+                name:
+                    getNameForReportingRowEntry(
+                        entry.key,
+                        aggregatedTableTimeEntries.value?.grouped_type
+                    ) ?? '',
+                color: color,
+            };
+        }) ?? []
+    );
+});
+
 const tableData = computed(() => {
     return aggregatedTableTimeEntries.value?.grouped_data?.map((entry) => {
         return {
@@ -260,13 +283,6 @@ const tableData = computed(() => {
         };
     });
 });
-
-const showBillableRate = computed(() => {
-    return !!(
-        getCurrentRole() !== 'employee' ||
-        organization?.value?.employees_can_see_billable_rates
-    );
-});
 </script>
 
 <template>
@@ -289,7 +305,7 @@ const showBillableRate = computed(() => {
     <div class="py-2.5 w-full border-b border-default-background-separator">
         <MainContainer class="sm:flex space-y-4 sm:space-y-0 justify-between">
             <div
-                class="flex flex-wrap items-center space-y-2 sm:space-y-0 space-x-3">
+                class="flex flex-wrap items-center space-y-2 sm:space-y-0 space-x-4">
                 <div class="text-sm font-medium">Filters</div>
                 <MemberMultiselectDropdown
                     v-model="selectedMembers"
@@ -379,11 +395,6 @@ const showBillableRate = computed(() => {
                             :icon="BillableIcon"></ReportingFilterBadge>
                     </template>
                 </SelectDropdown>
-                <ReportingRoundingControls
-                    v-model:enabled="roundingEnabled"
-                    v-model:type="roundingType"
-                    v-model:minutes="roundingMinutes"
-                    @change="updateReporting"></ReportingRoundingControls>
             </div>
             <div>
                 <DateRangePicker
@@ -403,9 +414,9 @@ const showBillableRate = computed(() => {
         </div>
     </MainContainer>
     <MainContainer>
-        <div class="pt-6 items-start">
+        <div class="sm:grid grid-cols-4 pt-6 items-start">
             <div
-                class="bg-card-background rounded-lg border border-card-border pt-3">
+                class="col-span-3 bg-card-background rounded-lg border border-card-border pt-3">
                 <div
                     class="text-sm flex text-text-primary items-center space-x-3 font-medium px-6 border-b border-card-background-separator pb-3">
                     <span>Group by</span>
@@ -425,24 +436,33 @@ const showBillableRate = computed(() => {
                             updateTableReporting
                         "></ReportingGroupBySelect>
                 </div>
-                <div class="px-6 pt-6 pb-3">
-                    <template
-                        v-for="reportingRowEntry in tableData"
-                        :key="reportingRowEntry.description">
-                        <ReportingRow
-                            :entry="reportingRowEntry"
-                            :currency="getOrganizationCurrencyString()"></ReportingRow>
-                    </template>
+                <div
+                    class="grid items-center"
+                    style="grid-template-columns: 1fr 100px 150px">
                     <div
+                        class="contents [&>*]:border-card-background-separator [&>*]:border-b [&>*]:bg-tertiary [&>*]:pb-1.5 [&>*]:pt-1 text-text-secondary text-sm">
+                        <div class="pl-6">Name</div>
+                        <div class="text-right">Duration</div>
+                        <div class="text-right pr-6">Cost</div>
+                    </div>
+                    <template
                         v-if="
-                            aggregatedTableTimeEntries &&
-                            aggregatedTableTimeEntries.grouped_data &&
-                            aggregatedTableTimeEntries.grouped_data.length > 0
-                        "
-                        class="border-t border-background-separator pt-3 mt-6 text-sm space-y-2">
-                        <div class="justify-between items-center flex">
-                            <div class="font-medium">Total</div>
-                            <div class="font-medium">
+                            aggregatedTableTimeEntries?.grouped_data &&
+                            aggregatedTableTimeEntries.grouped_data?.length > 0
+                        ">
+                        <ReportingRow
+                            v-for="entry in tableData"
+                            :key="entry.description ?? 'none'"
+                            :currency="getOrganizationCurrencyString()"
+                            :type="aggregatedTableTimeEntries.grouped_type"
+                            :entry="entry"></ReportingRow>
+                        <div
+                            class="contents [&>*]:transition text-text-tertiary [&>*]:h-[50px]">
+                            <div class="flex items-center pl-6 font-medium">
+                                <span>Total</span>
+                            </div>
+                            <div
+                                class="justify-end flex items-center font-medium">
                                 {{
                                     formatHumanReadableDuration(
                                         aggregatedTableTimeEntries.seconds,
@@ -451,36 +471,35 @@ const showBillableRate = computed(() => {
                                     )
                                 }}
                             </div>
-                        </div>
-                        <div
-                            v-if="
-                                aggregatedTableTimeEntries.cost !== null &&
-                                showBillableRate
-                            "
-                            class="justify-between items-center flex">
-                            <div class="font-medium">Total Billable</div>
-                            <div class="justify-end pr-6 flex items-center font-medium">
+                            <div
+                                class="justify-end pr-6 flex items-center font-medium">
                                 {{
-                                    formatCents(
-                                        aggregatedTableTimeEntries.cost,
-                                        getOrganizationCurrencyString(),
-                                        organization?.currency_format,
-                                        organization?.currency_symbol,
-                                        organization?.number_format
-                                    )
+                                    aggregatedTableTimeEntries.cost
+                                        ? formatCents(
+                                              aggregatedTableTimeEntries.cost,
+                                              getOrganizationCurrencyString(),
+                                              organization?.currency_format,
+                                              organization?.currency_symbol,
+                                              organization?.number_format
+                                          )
+                                        : '--'
                                 }}
                             </div>
                         </div>
-                    </div>
+                    </template>
                     <div
                         v-else
-                        class="chart flex flex-col items-center justify-center py-12">
-                        <p class="text-lg text-text-primary font-medium">
+                        class="chart flex flex-col items-center justify-center py-12 col-span-3">
+                        <p class="text-lg text-text-primary font-semibold">
                             No time entries found
                         </p>
                         <p>Try to change the filters and time range</p>
                     </div>
                 </div>
+            </div>
+            <div class="px-2 lg:px-4">
+                <ReportingPieChart
+                    :data="groupedPieChartData"></ReportingPieChart>
             </div>
         </div>
     </MainContainer>
