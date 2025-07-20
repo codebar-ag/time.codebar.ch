@@ -244,6 +244,32 @@ Removed redundant status column from members table to maintain consistency with 
 
 **Result:** Members table now shows: Name → Email → Role → Billable Rate → Edit
 
+### Restore Weekly Project Overview API Query
+
+Fixed issue where removing ProjectsChartCard accidentally broke other dashboard functionality.
+
+**File:** `resources/js/Components/Dashboard/ThisWeekOverview.vue`
+
+**Problem:** When removing the ProjectsChartCard component, the `weeklyProjectOverview` API query was also removed, which might be used by other parts of the dashboard.
+
+**Fixed by restoring API query:**
+```js
+// Set up the queries
+const { data: weeklyProjectOverview } = useQuery({
+    queryKey: ['weeklyProjectOverview', organizationId],
+    queryFn: () => {
+        return api.weeklyProjectOverview({
+            params: {
+                organization: organizationId.value!,
+            },
+        });
+    },
+    enabled: computed(() => !!organizationId.value),
+});
+```
+
+**Result:** Dashboard data should now load properly without the ProjectsChartCard component being displayed.
+
 ### Add Search/Filter Functionality to Projects and Clients Pages
 
 Added real-time search functionality with wildcard matching to improve user experience.
