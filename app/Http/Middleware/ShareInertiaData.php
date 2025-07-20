@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Client;
+use App\Models\Member;
 use App\Models\Organization;
+use App\Models\Project;
+use App\Models\Tag;
 use App\Models\User;
 use App\Service\PermissionStore;
 use Closure;
@@ -57,6 +61,17 @@ class ShareInertiaData
                         return [];
                     }
 
+                    // Get counts for current organization if it exists
+                    $currentTeamCounts = null;
+                    if ($user->currentTeam !== null) {
+                        $currentTeamCounts = [
+                            'projects' => Project::where('organization_id', $user->currentTeam->id)->whereNull('archived_at')->count(),
+                            'clients' => Client::where('organization_id', $user->currentTeam->id)->whereNull('archived_at')->count(),
+                            'members' => Member::where('organization_id', $user->currentTeam->id)->count(),
+                            'tags' => Tag::where('organization_id', $user->currentTeam->id)->count(),
+                        ];
+                    }
+
                     return array_merge([
                         'id' => $user->id,
                         'name' => $user->name,
@@ -75,6 +90,7 @@ class ShareInertiaData
                             'name' => $user->currentTeam->name,
                             'personal_team' => $user->currentTeam->personal_team,
                             'currency' => $user->currentTeam->currency,
+                            'counts' => $currentTeamCounts,
                         ] : null,
                     ], array_filter([
                         'all_teams' => $user->organizations->map(function (Organization $organization): array {
