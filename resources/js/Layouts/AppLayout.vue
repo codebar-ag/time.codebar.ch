@@ -52,10 +52,6 @@ defineProps({
 const showSidebarMenu = ref(false);
 const isUnloading = ref(false);
 
-// Get counts from Inertia props to avoid 401 errors
-const page = usePage();
-const counts = computed(() => page.props.auth.user.current_team?.counts || {});
-
 const { data: organization, isLoading: isOrganizationLoading } = useQuery({
     queryKey: ['organization', getCurrentOrganizationId()],
     queryFn: () =>
@@ -100,6 +96,23 @@ const page = usePage<{
         user: User;
     };
 }>();
+
+// Define the counts structure type and provide proper default
+type CountsType = {
+    projects: number;
+    clients: number;
+    members: number;
+    tags: number;
+};
+
+const defaultCounts: CountsType = {
+    projects: 0,
+    clients: 0,
+    members: 0,
+    tags: 0,
+};
+
+const counts = computed(() => page.props.auth.user.current_team?.counts || defaultCounts);
 </script>
 
 <template>
