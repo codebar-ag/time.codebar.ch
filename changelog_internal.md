@@ -35,7 +35,11 @@ if ($user->currentTeam !== null) {
 'current_team' => 'counts' => $currentTeamCounts,
  ```
 
+resources/js/Layouts/AppLayout.vue
 ```js
 const page = usePage();
 const counts = computed(() => page.props.auth.user.current_team?.counts || {});
 ```
+
+resources/js/Components/NavigationSidebarLink.vue
+resources/js/Components/NavigationSidebarItem.vue
