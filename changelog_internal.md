@@ -47,7 +47,7 @@ resources/js/Components/NavigationSidebarItem.vue
 
 ### Hide ProjectsChartCard on Dashboard
 
-Disable Dashboard.hisWekkOverview.ProjectsChartCard
+Disable Dashboard.ThisWeekOverview.ProjectsChartCard
 
 
 ### Remove Active from Clients & Projects
