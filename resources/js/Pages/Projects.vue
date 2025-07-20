@@ -59,7 +59,7 @@ const shownProjects = computed(() => {
             const projectNameMatch = project.name.toLowerCase().includes(query);
             
             // Search in client name
-            const client = clientsMap.get(project.client_id);
+            const client = project.client_id ? clientsMap.get(project.client_id) : null;
             const clientNameMatch = client?.name.toLowerCase().includes(query) || false;
             
             return projectNameMatch || clientNameMatch;

@@ -7,6 +7,7 @@ import { formatHumanReadableDuration } from '@/packages/ui/src/utils/time';
 import ReportingRow from '@/Components/Common/Reporting/ReportingRow.vue';
 import { formatCents } from '@/packages/ui/src/utils/money';
 import type { CurrencyFormat } from '@/packages/ui/src/utils/money';
+import { getOrganizationCurrencyString } from '@/utils/money';
 import { computed, onMounted, provide, ref } from 'vue';
 import { useQuery } from '@tanstack/vue-query';
 import { api } from '@/packages/api/src';
@@ -184,20 +185,16 @@ onMounted(async () => {
                     </div>
                     <div class="px-6 pt-6 pb-3">
                         <template
-                            v-for="reportingRowEntry in aggregatedTableTimeEntries?.grouped_data"
-                            :key="reportingRowEntry.key">
+                            v-for="reportingRowEntry in tableData"
+                            :key="reportingRowEntry.description">
                             <ReportingRow
-                                :reporting-row-entry="reportingRowEntry"
-                                :grouped-type="
-                                    aggregatedTableTimeEntries?.grouped_type
-                                "
-                                :show-seconds="false"
-                                :group="group"
-                                :sub-group="subGroup"></ReportingRow>
+                                :entry="reportingRowEntry"
+                                :currency="getOrganizationCurrencyString()"></ReportingRow>
                         </template>
                         <div
                             v-if="
                                 aggregatedTableTimeEntries &&
+                                aggregatedTableTimeEntries.grouped_data &&
                                 aggregatedTableTimeEntries.grouped_data.length >
                                     0
                             "

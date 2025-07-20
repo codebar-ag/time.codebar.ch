@@ -260,6 +260,13 @@ const tableData = computed(() => {
         };
     });
 });
+
+const showBillableRate = computed(() => {
+    return !!(
+        getCurrentRole() !== 'employee' ||
+        organization?.value?.employees_can_see_billable_rates
+    );
+});
 </script>
 
 <template>
@@ -420,20 +427,16 @@ const tableData = computed(() => {
                 </div>
                 <div class="px-6 pt-6 pb-3">
                     <template
-                        v-for="reportingRowEntry in aggregatedTableTimeEntries?.grouped_data"
-                        :key="reportingRowEntry.key">
+                        v-for="reportingRowEntry in tableData"
+                        :key="reportingRowEntry.description">
                         <ReportingRow
-                            :reporting-row-entry="reportingRowEntry"
-                            :grouped-type="
-                                aggregatedTableTimeEntries?.grouped_type
-                            "
-                            :show-seconds="showSeconds"
-                            :group="group"
-                            :sub-group="subGroup"></ReportingRow>
+                            :entry="reportingRowEntry"
+                            :currency="getOrganizationCurrencyString()"></ReportingRow>
                     </template>
                     <div
                         v-if="
                             aggregatedTableTimeEntries &&
+                            aggregatedTableTimeEntries.grouped_data &&
                             aggregatedTableTimeEntries.grouped_data.length > 0
                         "
                         class="border-t border-background-separator pt-3 mt-6 text-sm space-y-2">
@@ -468,7 +471,7 @@ const tableData = computed(() => {
                                 }}
                             </div>
                         </div>
-                    </template>
+                    </div>
                     <div
                         v-else
                         class="chart flex flex-col items-center justify-center py-12">
