@@ -32,6 +32,13 @@ export interface Organization {
     owner: User;
     users: User[];
     team_invitations: OrganizationInvitation[];
+    // additional data for current team (from ShareInertiaData)
+    counts?: {
+        projects: number;
+        clients: number;
+        members: number;
+        tags: number;
+    };
 }
 
 export interface OrganizationInvitation {

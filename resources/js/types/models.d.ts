@@ -25,6 +25,12 @@ export interface Organization {
     owner: User;
     users: User[];
     team_invitations: OrganizationInvitation[];
+    counts?: {
+        projects: number;
+        clients: number;
+        members: number;
+        tags: number;
+    };
 }
 export interface OrganizationInvitation {
     id: string;
