@@ -45,7 +45,7 @@ resources/js/Components/NavigationSidebarLink.vue
 resources/js/Components/NavigationSidebarItem.vue
 
 
-### Hide ProjectsChartCard on Dashbaord
+### Hide ProjectsChartCard on Dashboard
 
 Disable Dashboard.hisWekkOverview.ProjectsChartCard
 
