@@ -80,16 +80,16 @@ class LocalizationService
         if ($this->intervalFormat === IntervalFormat::Decimal) {
             $interval->cascade();
 
-            return $this->formatNumber($interval->totalHours);
+            return $this->formatNumber($interval->totalHours).' h';
         } elseif ($this->intervalFormat === IntervalFormat::HoursMinutes) {
             $interval->cascade();
 
             return ((int) floor($interval->totalHours)).'h '.$interval->format('%I').'m';
-        } elseif ($this->intervalFormat === IntervalFormat::HoursMinutesColonSeperated) {
+        } elseif ($this->intervalFormat === IntervalFormat::HoursMinutesColonSeparated) {
             $interval->cascade();
 
             return ((int) floor($interval->totalHours)).':'.$interval->format('%I');
-        } elseif ($this->intervalFormat === IntervalFormat::HoursMinutesSecondsColonSeperated) {
+        } elseif ($this->intervalFormat === IntervalFormat::HoursMinutesSecondsColonSeparated) {
             $interval->cascade();
 
             return ((int) floor($interval->totalHours)).':'.$interval->format('%I:%S');

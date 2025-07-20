@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Api\V1\ApiTokenController;
 use App\Http\Controllers\Api\V1\ChartController;
 use App\Http\Controllers\Api\V1\ClientController;
+use App\Http\Controllers\Api\V1\CurrencyController;
 use App\Http\Controllers\Api\V1\ExportController;
 use App\Http\Controllers\Api\V1\ImportController;
 use App\Http\Controllers\Api\V1\InvitationController;
@@ -113,6 +114,7 @@ Route::prefix('v1')->name('v1.')->group(static function (): void {
 
         Route::name('users.time-entries.')->group(static function (): void {
             Route::get('/users/me/time-entries/active', [UserTimeEntryController::class, 'myActive'])->name('my-active');
+            Route::get('/users/me/time-entries', [UserTimeEntryController::class, 'my'])->name('my'); // TODO
         });
 
         // Report routes
@@ -172,6 +174,8 @@ Route::prefix('v1')->name('v1.')->group(static function (): void {
             Route::post('/export', [ExportController::class, 'export'])->name('export');
         });
     });
+
+    Route::get('/currencies', [CurrencyController::class, 'index'])->name('currencies.index');
 
     // Public routes
     Route::name('public.')->prefix('/public')->group(static function (): void {

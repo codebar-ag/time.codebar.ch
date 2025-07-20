@@ -16,6 +16,7 @@ import {
 } from '@heroicons/vue/20/solid';
 import DateRangePicker from '@/packages/ui/src/Input/DateRangePicker.vue';
 import BillableIcon from '@/packages/ui/src/Icons/BillableIcon.vue';
+import ReportingRoundingControls from '@/Components/Common/Reporting/ReportingRoundingControls.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import {
     getDayJsInstance,
@@ -69,6 +70,9 @@ import { isAllowedToPerformPremiumAction } from '@/utils/billing';
 import {canCreateProjects, canViewAllTimeEntries} from '@/utils/permissions';
 import ReportingExportModal from '@/Components/Common/Reporting/ReportingExportModal.vue';
 
+// TimeEntryRoundingType is now defined in ReportingRoundingControls component
+type TimeEntryRoundingType = 'up' | 'down' | 'nearest';
+
 const startDate = useSessionStorage<string>(
     'reporting-start-date',
     getLocalizedDayJs(getDayJsInstance()().format()).subtract(14, 'd').format()
@@ -83,9 +87,17 @@ const selectedMembers = ref<string[]>([]);
 const selectedTasks = ref<string[]>([]);
 const selectedClients = ref<string[]>([]);
 const billable = ref<'true' | 'false' | null>(null);
+const roundingEnabled = ref<boolean>(false);
+const roundingType = ref<TimeEntryRoundingType>('nearest');
+const roundingMinutes = ref<number>(15);
 
 const { members } = storeToRefs(useMembersStore());
 const pageLimit = 15;
+
+// Watch rounding enabled state to trigger updates
+watch(roundingEnabled, () => {
+    updateFilteredTimeEntries();
+});
 const currentPage = ref(1);
 
 function getFilterAttributes() {
@@ -115,6 +127,8 @@ function getFilterAttributes() {
                 : undefined,
         tag_ids: selectedTags.value.length > 0 ? selectedTags.value : undefined,
         billable: billable.value !== null ? billable.value : undefined,
+        rounding_type: roundingEnabled.value ? roundingType.value : undefined,
+        rounding_minutes: roundingEnabled.value ? roundingMinutes.value : undefined,
     };
     return params;
 }
@@ -268,7 +282,7 @@ async function downloadExport(format: ExportFormat) {
             <MainContainer
                 class="sm:flex space-y-4 sm:space-y-0 justify-between">
                 <div
-                    class="flex flex-wrap items-center space-y-2 sm:space-y-0 space-x-4">
+                    class="flex flex-wrap items-center space-y-2 sm:space-y-0 space-x-3">
                     <div class="text-sm font-medium">Filters</div>
                     <MemberMultiselectDropdown
                         v-model="selectedMembers"
@@ -358,6 +372,11 @@ async function downloadExport(format: ExportFormat) {
                                 :icon="BillableIcon"></ReportingFilterBadge>
                         </template>
                     </SelectDropdown>
+                    <ReportingRoundingControls
+                        v-model:enabled="roundingEnabled"
+                        v-model:type="roundingType"
+                        v-model:minutes="roundingMinutes"
+                        @change="updateFilteredTimeEntries" />
                 </div>
                 <div>
                     <DateRangePicker

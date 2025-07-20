@@ -21,6 +21,7 @@ const sortedClients = computed(() => {
 </script>
 
 <template>
+<<<<<<< HEAD
   <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
   <div class="flow-root max-w-[100vw] overflow-x-auto">
     <div class="inline-block min-w-full align-middle">
@@ -44,6 +45,38 @@ const sortedClients = computed(() => {
               @click="createClient = true">
             Create your First Client
           </SecondaryButton>
+=======
+    <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
+    <div class="flow-root max-w-[100vw] overflow-x-auto">
+        <div class="inline-block min-w-full align-middle">
+            <div
+                data-testid="client_table"
+                class="grid min-w-full"
+                style="grid-template-columns: 1fr 150px 200px 80px">
+                <ClientTableHeading></ClientTableHeading>
+                <div
+                    v-if="clients.length === 0"
+                    class="col-span-3 py-24 text-center">
+                    <UserCircleIcon
+                        class="w-8 text-icon-default inline pb-2"></UserCircleIcon>
+                    <h3 class="text-text-primary font-semibold">
+                        No clients found
+                    </h3>
+                    <p v-if="canCreateClients()" class="pb-5">
+                        Create your first client now!
+                    </p>
+                    <SecondaryButton
+                        v-if="canCreateClients()"
+                        :icon="PlusIcon as Component"
+                        @click="createClient = true"
+                        >Create your First Client
+                    </SecondaryButton>
+                </div>
+                <template v-for="client in clients" :key="client.id">
+                    <ClientTableRow :client="client"></ClientTableRow>
+                </template>
+            </div>
+>>>>>>> upstream/main
         </div>
 
         <template v-for="client in sortedClients" :key="client.id">
