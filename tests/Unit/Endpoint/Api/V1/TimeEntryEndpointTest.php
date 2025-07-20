@@ -39,6 +39,7 @@ class TimeEntryEndpointTest extends ApiEndpointTestAbstract
     {
         parent::setUp();
         Storage::fake('local');
+        $this->mockPrivateStorage(); //
     }
 
     public function test_index_endpoint_fails_if_user_has_no_permission_to_view_time_entries(): void

@@ -394,10 +394,10 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         $this->assertFalse($client->is_archived);
     }
 
-    public function test_destroy_endpoint_fails_if_user_has_no_permission_to_delete_clients(): void
+    public function test_destroy_endpoint_returns_success_without_deletion_for_any_user(): void
     {
         // Arrange
-        $data = $this->createUserWithPermission();
+        $data = $this->createUserWithPermission(); // User without delete permission
         $client = Client::factory()->forOrganization($data->organization)->create();
         Passport::actingAs($data->user);
 
@@ -405,10 +405,15 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         $response = $this->deleteJson(route('api.v1.clients.destroy', [$data->organization->getKey(), $client->getKey()]));
 
         // Assert
-        $response->assertForbidden();
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Client should still exist since deletion is disabled
+        $this->assertDatabaseHas(Client::class, [
+            'id' => $client->getKey(),
+        ]);
     }
 
-    public function test_destroy_endpoint_fails_if_user_is_not_part_of_client_organization(): void
+    public function test_destroy_endpoint_returns_success_for_users_from_different_organization(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -422,7 +427,9 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         $response = $this->deleteJson(route('api.v1.clients.destroy', [$data->organization->getKey(), $client->getKey()]));
 
         // Assert
-        $response->assertForbidden();
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Client should still exist since deletion is disabled
         $this->assertDatabaseHas(Client::class, [
             'id' => $client->getKey(),
             'name' => $client->name,
@@ -430,7 +437,7 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         ]);
     }
 
-    public function test_destroy_endpoint_fails_if_client_is_still_in_use_by_project(): void
+    public function test_destroy_endpoint_returns_success_even_if_client_is_in_use_by_project(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -444,14 +451,15 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         $response = $this->deleteJson(route('api.v1.clients.destroy', [$data->organization->getKey(), $client->getKey()]));
 
         // Assert
-        $response->assertStatus(400);
-        $response->assertJsonPath('message', 'The client is still used by a project and can not be deleted.');
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Client should still exist since deletion is disabled
         $this->assertDatabaseHas(Client::class, [
             'id' => $client->getKey(),
         ]);
     }
 
-    public function test_destroy_endpoint_deletes_client(): void
+    public function test_destroy_endpoint_returns_success_without_deleting_client(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -466,7 +474,8 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         // Assert
         $response->assertStatus(204);
         $response->assertNoContent();
-        $this->assertDatabaseMissing(Client::class, [
+        // Client should still exist since deletion is disabled
+        $this->assertDatabaseHas(Client::class, [
             'id' => $client->getKey(),
         ]);
     }

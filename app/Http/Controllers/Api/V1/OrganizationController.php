@@ -7,9 +7,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\Role;
 use App\Http\Requests\V1\Organization\OrganizationUpdateRequest;
 use App\Http\Resources\V1\Organization\OrganizationResource;
+use App\Models\Client;
+use App\Models\Member;
 use App\Models\Organization;
+use App\Models\Project;
+use App\Models\Tag;
 use App\Service\BillableRateService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\JsonResponse;
 
 class OrganizationController extends Controller
 {
@@ -27,6 +32,27 @@ class OrganizationController extends Controller
         $showBillableRate = $this->member($organization)->role !== Role::Employee->value || $organization->employees_can_see_billable_rates;
 
         return new OrganizationResource($organization, $showBillableRate);
+    }
+
+    /**
+     * Get counts for sidebar items
+     *
+     * @operationId getOrganizationCounts
+     *
+     * @throws AuthorizationException
+     */
+    public function getCounts(Organization $organization): JsonResponse
+    {
+        $this->checkPermission($organization, 'organizations:view');
+
+        $counts = [
+            'projects' => Project::where('organization_id', $organization->id)->whereNull('archived_at')->count(),
+            'clients' => Client::where('organization_id', $organization->id)->whereNull('archived_at')->count(),
+            'members' => Member::where('organization_id', $organization->id)->count(),
+            'tags' => Tag::where('organization_id', $organization->id)->count(),
+        ];
+
+        return response()->json(['data' => $counts]);
     }
 
     /**

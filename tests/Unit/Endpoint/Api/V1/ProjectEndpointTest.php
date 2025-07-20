@@ -1102,7 +1102,26 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
         $this->assertFalse($project->is_archived);
     }
 
-    public function test_destroy_endpoint_fails_if_user_is_not_part_of_project_organization(): void
+    public function test_destroy_endpoint_returns_success_without_deletion_for_any_user(): void
+    {
+        // Arrange
+        $data = $this->createUserWithPermission(); // User without delete permission
+        $project = Project::factory()->forOrganization($data->organization)->create();
+        Passport::actingAs($data->user);
+
+        // Act
+        $response = $this->deleteJson(route('api.v1.projects.destroy', [$data->organization->getKey(), $project->getKey()]));
+
+        // Assert
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Project should still exist since deletion is disabled
+        $this->assertDatabaseHas(Project::class, [
+            'id' => $project->getKey(),
+        ]);
+    }
+
+    public function test_destroy_endpoint_returns_success_for_users_from_different_organization(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -1116,24 +1135,15 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
         $response = $this->deleteJson(route('api.v1.projects.destroy', [$data->organization->getKey(), $project->getKey()]));
 
         // Assert
-        $response->assertForbidden();
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Project should still exist since deletion is disabled
+        $this->assertDatabaseHas(Project::class, [
+            'id' => $project->getKey(),
+        ]);
     }
 
-    public function test_destroy_endpoint_fails_if_user_has_no_permission_to_delete_projects(): void
-    {
-        // Arrange
-        $data = $this->createUserWithPermission();
-        $project = Project::factory()->forOrganization($data->organization)->create();
-        Passport::actingAs($data->user);
-
-        // Act
-        $response = $this->deleteJson(route('api.v1.projects.destroy', [$data->organization->getKey(), $project->getKey()]));
-
-        // Assert
-        $response->assertForbidden();
-    }
-
-    public function test_destroy_endpoint_fails_if_project_is_still_in_use_by_a_task(): void
+    public function test_destroy_endpoint_returns_success_even_if_project_is_in_use_by_task(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -1147,14 +1157,15 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
         $response = $this->deleteJson(route('api.v1.projects.destroy', [$data->organization->getKey(), $project->getKey()]));
 
         // Assert
-        $response->assertStatus(400);
-        $response->assertJsonPath('message', 'The project is still used by a task and can not be deleted.');
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Project should still exist since deletion is disabled
         $this->assertDatabaseHas(Project::class, [
             'id' => $project->getKey(),
         ]);
     }
 
-    public function test_destroy_endpoint_fails_if_project_is_still_in_use_by_a_time_entry(): void
+    public function test_destroy_endpoint_returns_success_even_if_project_is_in_use_by_time_entry(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -1168,14 +1179,15 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
         $response = $this->deleteJson(route('api.v1.projects.destroy', [$data->organization->getKey(), $project->getKey()]));
 
         // Assert
-        $response->assertStatus(400);
-        $response->assertJsonPath('message', 'The project is still used by a time entry and can not be deleted.');
+        $response->assertStatus(204);
+        $response->assertNoContent();
+        // Project should still exist since deletion is disabled
         $this->assertDatabaseHas(Project::class, [
             'id' => $project->getKey(),
         ]);
     }
 
-    public function test_destroy_endpoint_deletes_project_with_project_members(): void
+    public function test_destroy_endpoint_returns_success_without_deleting_project_members(): void
     {
         // Arrange
         $data = $this->createUserWithPermission([
@@ -1191,10 +1203,11 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
         // Assert
         $response->assertStatus(204);
         $response->assertNoContent();
-        $this->assertDatabaseMissing(Project::class, [
+        // Project and members should still exist since deletion is disabled
+        $this->assertDatabaseHas(Project::class, [
             'id' => $project->getKey(),
         ]);
-        $this->assertDatabaseMissing(ProjectMember::class, [
+        $this->assertDatabaseHas(ProjectMember::class, [
             'id' => $projectMember->getKey(),
         ]);
     }

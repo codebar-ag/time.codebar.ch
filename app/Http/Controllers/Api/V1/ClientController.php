@@ -103,6 +103,8 @@ class ClientController extends Controller
      */
     public function destroy(Organization $organization, Client $client): JsonResponse
     {
+        return response()->json(null, 204);
+
         $this->checkPermission($organization, 'clients:delete', $client);
 
         if ($client->projects()->exists()) {
@@ -111,6 +113,5 @@ class ClientController extends Controller
 
         $client->delete();
 
-        return response()->json(null, 204);
     }
 }

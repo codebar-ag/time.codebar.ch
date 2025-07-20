@@ -14,6 +14,7 @@ const props = defineProps<{
     icon?: Component;
     current?: boolean;
     href: string;
+    count?: number;
     subItems?: { title: string; route: string, show: boolean }[];
 }>();
 
@@ -28,6 +29,7 @@ const open = useSessionStorage('nav-collapse-state-' + props.title, true);
             :title
             :icon
             :current
+            :count
             :href></NavigationSidebarLink>
         <CollapsibleRoot v-else v-model:open="open"
             ><CollapsibleTrigger class="w-full group py-0.5">
@@ -49,11 +51,23 @@ const open = useSessionStorage('nav-collapse-state-' + props.title, true);
                         </span>
                     </div>
 
-                    <ChevronRightIcon
-                        :class="[
-                            'w-5 text-text-secondary',
-                            { 'transform rotate-90': open },
-                        ]"></ChevronRightIcon>
+                    <div class="flex items-center gap-x-2">
+                        <div
+                            v-if="count !== undefined && count >= 0"
+                            :class="[
+                                current
+                                    ? 'bg-background text-text-secondary'
+                                    : 'bg-default-background text-text-tertiary group-hover:bg-background group-hover:text-text-secondary',
+                                'transition rounded-full px-1.5 py-0.5 text-xs font-medium min-w-5 text-center leading-none',
+                            ]">
+                            {{ count > 99 ? '99+' : count }}
+                        </div>
+                        <ChevronRightIcon
+                            :class="[
+                                'w-5 text-text-secondary',
+                                { 'transform rotate-90': open },
+                            ]"></ChevronRightIcon>
+                    </div>
                 </div>
             </CollapsibleTrigger>
             <CollapsibleContent class="CollapsibleContent">

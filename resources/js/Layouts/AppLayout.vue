@@ -63,6 +63,33 @@ const { data: organization, isLoading: isOrganizationLoading } = useQuery({
     enabled: !!getCurrentOrganizationId(),
 });
 
+// Fetch sidebar counts
+const { data: countsData } = useQuery({
+    queryKey: ['organization-counts', getCurrentOrganizationId()],
+    queryFn: async () => {
+        const organizationId = getCurrentOrganizationId();
+        if (!organizationId) return null;
+        
+        const response = await fetch(`/api/v1/organizations/${organizationId}/counts`, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin', // Include cookies for authentication
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch counts');
+        }
+        
+        return response.json();
+    },
+    enabled: !!getCurrentOrganizationId(),
+});
+
+const counts = computed(() => countsData.value?.data || {});
+
 provide(
     'organization',
     computed(() => organization.value?.data)
@@ -181,6 +208,7 @@ const page = usePage<{
                                 title="Projects"
                                 :icon="FolderIcon"
                                 :href="route('projects')"
+                                :count="counts.projects"
                                 :current="
                                     route().current('projects')
                                 "></NavigationSidebarItem>
@@ -189,6 +217,7 @@ const page = usePage<{
                                 title="Clients"
                                 :icon="UserCircleIcon"
                                 :current="route().current('clients')"
+                                :count="counts.clients"
                                 :href="
                                     route('clients')
                                 "></NavigationSidebarItem>
@@ -197,6 +226,7 @@ const page = usePage<{
                                 title="Members"
                                 :icon="UserGroupIcon"
                                 :current="route().current('members')"
+                                :count="counts.members"
                                 :href="
                                     route('members')
                                 "></NavigationSidebarItem>
@@ -205,6 +235,7 @@ const page = usePage<{
                                 title="Tags"
                                 :icon="TagIcon"
                                 :current="route().current('tags')"
+                                :count="counts.tags"
                                 :href="route('tags')"></NavigationSidebarItem>
                             <NavigationSidebarItem
                                 v-if="
