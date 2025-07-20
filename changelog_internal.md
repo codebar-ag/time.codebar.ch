@@ -246,7 +246,7 @@ Removed redundant status column from members table to maintain consistency with 
 
 ### Remove Pie Chart from Reporting Pages
 
-Removed the same pie chart component from reporting pages as was removed from dashboard.
+Completely removed the ReportingPieChart component from the entire application.
 
 **Files modified:**
 - `resources/js/Components/Common/Reporting/ReportingOverview.vue`  
@@ -267,12 +267,56 @@ Removed the same pie chart component from reporting pages as was removed from da
 - </div>
 ```
 
+**Removed computed properties:**
+```js
+- const groupedPieChartData = computed(() => { ... });
+```
+
+**File to delete:** `resources/js/Components/Common/Reporting/ReportingPieChart.vue` (component file no longer needed)
+
 **Layout changes:**
 - Removed sidebar layout (grid-cols-4) 
 - Table now spans full width
 - Bar chart (ReportingChart) remains for data visualization
 
-**Result:** Reporting pages now show only the bar chart and data table, with the pie chart sidebar removed.
+**Result:** ReportingPieChart component completely removed from the application - no imports, no usage, no data generation.
+
+### Performance Optimization: Projects Search Filter
+
+Optimized the search filter in Projects.vue to improve performance when searching through projects and their associated clients.
+
+**File modified:** `resources/js/Pages/Projects.vue`
+
+**Problem:** O(n*m) complexity - the client lookup inside the filter loop was inefficient
+- For each project (n), was calling `clients.value.find()` (m operations)
+- With many projects and clients, this created performance bottlenecks
+
+**Solution:** Create clientsMap before filtering for O(1) lookup
+
+**Before:**
+```js
+// Search in client name
+const client = clients.value.find(client => client.id === project.client_id);
+const clientNameMatch = client?.name.toLowerCase().includes(query) || false;
+```
+
+**After:**
+```js
+// Create clients map for O(1) lookup performance
+const clientsMap = new Map(clients.value.map(c => [c.id, c]));
+
+filteredProjects = filteredProjects.filter((project) => {
+    // Search in client name
+    const client = clientsMap.get(project.client_id);
+    const clientNameMatch = client?.name.toLowerCase().includes(query) || false;
+    // ...
+});
+```
+
+**Performance improvement:** O(n*m) → O(n+m) complexity
+- Map creation: O(m) - done once
+- Lookups: O(1) per project instead of O(m)
+- Significant improvement with large datasets
 
 ### Fix Client Table Column Positioning
 

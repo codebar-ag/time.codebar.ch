@@ -50,12 +50,16 @@ const shownProjects = computed(() => {
     // Apply search filter
     if (searchQuery.value.trim()) {
         const query = searchQuery.value.toLowerCase().trim();
+        
+        // Create clients map for O(1) lookup performance
+        const clientsMap = new Map(clients.value.map(c => [c.id, c]));
+        
         filteredProjects = filteredProjects.filter((project) => {
             // Search in project name
             const projectNameMatch = project.name.toLowerCase().includes(query);
             
             // Search in client name
-            const client = clients.value.find(client => client.id === project.client_id);
+            const client = clientsMap.get(project.client_id);
             const clientNameMatch = client?.name.toLowerCase().includes(query) || false;
             
             return projectNameMatch || clientNameMatch;

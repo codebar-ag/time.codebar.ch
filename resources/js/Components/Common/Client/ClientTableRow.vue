@@ -40,8 +40,7 @@ const showEditModal = ref(false);
         <ClientEditModal
             v-model:show="showEditModal"
             :client="client"></ClientEditModal>
-        <div
-            class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12">
+        <div class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
             <span>
                 {{ client.name }}
             </span>
