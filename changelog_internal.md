@@ -43,3 +43,17 @@ const counts = computed(() => page.props.auth.user.current_team?.counts || {});
 
 resources/js/Components/NavigationSidebarLink.vue
 resources/js/Components/NavigationSidebarItem.vue
+
+
+### Hide ProjectsChartCard on Dashboard
+
+Disable Dashboard.ThisWeekOverview.ProjectsChartCard
+
+
+### Remove Active from Clients & Projects
+
+Remove Active Icon + Label from clients & projects pages.
+
+### Projects.index
+- Sort by clients.name asc then projects.name asc
+- move clients.name column before projects.name column
