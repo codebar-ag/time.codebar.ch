@@ -244,6 +244,55 @@ Removed redundant status column from members table to maintain consistency with 
 
 **Result:** Members table now shows: Name → Email → Role → Billable Rate → Edit
 
+### Remove Pie Chart from Reporting Pages
+
+Removed the same pie chart component from reporting pages as was removed from dashboard.
+
+**Files modified:**
+- `resources/js/Components/Common/Reporting/ReportingOverview.vue`  
+- `resources/js/Pages/SharedReport.vue`
+
+**Component removed:** `ReportingPieChart` (equivalent to the `ProjectsChartCard` removed from dashboard)
+
+**Removed imports:**
+```js
+- import ReportingPieChart from '@/Components/Common/Reporting/ReportingPieChart.vue';
+```
+
+**Removed from templates:**
+```vue
+- <div class="px-2 lg:px-4">
+-     <ReportingPieChart
+-         :data="groupedPieChartData"></ReportingPieChart>
+- </div>
+```
+
+**Layout changes:**
+- Removed sidebar layout (grid-cols-4) 
+- Table now spans full width
+- Bar chart (ReportingChart) remains for data visualization
+
+**Result:** Reporting pages now show only the bar chart and data table, with the pie chart sidebar removed.
+
+### Fix Client Table Column Positioning
+
+Fixed layout issue where Projects column had excessive spacing from Name column.
+
+**File:** `resources/js/Components/Common/Client/ClientTableRow.vue`
+
+**Problem:** Projects column had excessive padding pushing it away from Name column.
+
+**Fixed styling:**
+```vue
+- class="whitespace-nowrap flex items-center space-x-5 3xl:pl-12 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12"
++ class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12"
+
+- class="whitespace-nowrap flex items-center space-x-5 3xl:pl-12 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12"
++ class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary"
+```
+
+**Result:** Projects column now appears directly next to Name column with proper spacing.
+
 ### Restore Weekly Project Overview API Query
 
 Fixed issue where removing ProjectsChartCard accidentally broke other dashboard functionality.
