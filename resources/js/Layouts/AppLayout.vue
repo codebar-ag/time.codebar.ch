@@ -52,6 +52,10 @@ defineProps({
 const showSidebarMenu = ref(false);
 const isUnloading = ref(false);
 
+// Get counts from Inertia props to avoid 401 errors
+const page = usePage();
+const counts = computed(() => page.props.auth.user.current_team?.counts || {});
+
 const { data: organization, isLoading: isOrganizationLoading } = useQuery({
     queryKey: ['organization', getCurrentOrganizationId()],
     queryFn: () =>
@@ -62,33 +66,6 @@ const { data: organization, isLoading: isOrganizationLoading } = useQuery({
         }),
     enabled: !!getCurrentOrganizationId(),
 });
-
-// Fetch sidebar counts
-const { data: countsData } = useQuery({
-    queryKey: ['organization-counts', getCurrentOrganizationId()],
-    queryFn: async () => {
-        const organizationId = getCurrentOrganizationId();
-        if (!organizationId) return null;
-        
-        const response = await fetch(`/api/v1/organizations/${organizationId}/counts`, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin', // Include cookies for authentication
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to fetch counts');
-        }
-        
-        return response.json();
-    },
-    enabled: !!getCurrentOrganizationId(),
-});
-
-const counts = computed(() => countsData.value?.data || {});
 
 provide(
     'organization',
@@ -197,7 +174,7 @@ const page = usePage<{
                     </nav>
 
                     <div
-                        class="text-text-tertiary text-xs font-semibold pt-5 pb-1.5">
+                        class="text-text-tertiary text-sm font-semibold pt-5 pb-1.5">
                         Manage
                     </div>
 
@@ -249,7 +226,7 @@ const page = usePage<{
                     </nav>
                     <div
                         v-if="canUpdateOrganization()"
-                        class="text-text-tertiary text-xs font-semibold pt-5 pb-1.5">
+                        class="text-text-tertiary text-sm font-semibold pt-5 pb-1.5">
                         Admin
                     </div>
 

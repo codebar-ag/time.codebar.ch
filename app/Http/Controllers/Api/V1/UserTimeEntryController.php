@@ -4,16 +4,36 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Resources\V1\TimeEntry\TimeEntryCollection;
 use App\Http\Resources\V1\TimeEntry\TimeEntryResource;
 use App\Models\Organization;
 use App\Models\TimeEntry;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class UserTimeEntryController extends Controller
 {
+    /**
+     * Get all time entries of the current user
+     *
+     * This endpoint is independent of organization.
+     *
+     * @operationId getMyTimeEntries
+     */
+    public function my(): TimeEntryCollection
+    {
+        $user = $this->user();
+
+        $timeEntries = TimeEntry::query()
+            ->whereBelongsTo($user, 'user')
+            ->orderBy('start', 'desc')
+            ->limit(100) // Limit to avoid performance issues
+            ->get();
+
+        return new TimeEntryCollection($timeEntries);
+    }
+
     /**
      * Get the active time entry of the current user
      *
@@ -21,7 +41,7 @@ class UserTimeEntryController extends Controller
      *
      * @operationId getMyActiveTimeEntry
      */
-    public function myActive(): JsonResource
+    public function myActive(): JsonResponse
     {
         $user = $this->user();
 
@@ -40,9 +60,14 @@ class UserTimeEntryController extends Controller
         $activeTimeEntry = $activeTimeEntriesOfUser->first();
 
         if ($activeTimeEntry !== null) {
-            return new TimeEntryResource($activeTimeEntry);
+            return response()->json([
+                'data' => new TimeEntryResource($activeTimeEntry),
+            ]);
         } else {
-            throw new ModelNotFoundException('No active time entry');
+            return response()->json([
+                'data' => null,
+                'message' => 'No active time entry',
+            ], 200);
         }
     }
 }
