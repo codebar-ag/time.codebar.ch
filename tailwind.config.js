@@ -4,14 +4,15 @@ import typography from "@tailwindcss/typography";
 
 /** @type {import("tailwindcss").Config} */
 export default {
-    darkMode: ["selector", "class"],
+    darkMode: ["selector", ".dark"],
     content: [
         "./extensions/Invoicing/resources/js/**/*.vue",
         "./vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php",
         "./vendor/laravel/jetstream/**/*.blade.php",
         "./storage/framework/views/*.php",
         "./resources/views/**/*.blade.php",
-        "./resources/js/**/*.vue"
+        "./resources/js/**/*.vue",
+        "./resources/js/**/*.ts"
     ],
     theme: {
         extend: {
@@ -24,9 +25,24 @@ export default {
             },
             fontFamily: {
                 sans: [
-                    "Outfit",
+                    "Inter",
                     ...defaultTheme.fontFamily.sans
                 ]
+            },
+            fontSize: {
+                xs: ['0.75rem', { lineHeight: '1rem' }],
+                sm: ['0.8125rem', { lineHeight: '1.125rem' }],
+                base: ['0.875rem', { lineHeight: '1.25rem' }],
+                lg: ['1rem', { lineHeight: '1.5rem' }],
+                xl: ['1.125rem', { lineHeight: '1.75rem' }],
+                '2xl': ['1.25rem', { lineHeight: '1.75rem' }],
+                '3xl': ['1.5rem', { lineHeight: '2rem' }],
+                '4xl': ['1.75rem', { lineHeight: '2.25rem' }],
+                '5xl': ['2rem', { lineHeight: '1' }],
+                '6xl': ['2.25rem', { lineHeight: '1' }],
+                '7xl': ['2.5rem', { lineHeight: '1' }],
+                '8xl': ['3rem', { lineHeight: '1' }],
+                '9xl': ['3.5rem', { lineHeight: '1' }]
             },
             colors: {
                 ring: "var(--ring)",
@@ -87,8 +103,8 @@ export default {
                     "800": "rgba(var(--color-accent-800), <alpha-value>)",
                     "900": "rgba(var(--color-accent-900), <alpha-value>)",
                     "950": "rgba(var(--color-accent-950), <alpha-value>)",
-                    DEFAULT: "var(--color-bg-tertiary)",
-                    foreground: "rgb(var(--color-accent-200))"
+                    DEFAULT: "var(--color-accent-default)",
+                    foreground: "var(--color-accent-foreground)",
                 },
                 "button-primary-background": "var(--theme-color-button-primary-background)",
                 "button-primary-background-hover": "var(--theme-color-button-primary-background-hover)",

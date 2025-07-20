@@ -15,11 +15,9 @@ use Brick\Money\Money;
 use Carbon\CarbonInterval;
 use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\UsesClass;
 use Tests\TestCaseWithDatabase;
 
 #[CoversClass(LocalizationService::class)]
-#[UsesClass(LocalizationService::class)]
 class LocalizationServiceTest extends TestCaseWithDatabase
 {
     private LocalizationService $localizationService;
@@ -29,7 +27,7 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         parent::setUp();
         $this->localizationService = new LocalizationService(
             CurrencyFormat::SymbolAfterWithSpace,
-            DateFormat::PointSeperatedDMYYYY,
+            DateFormat::PointSeparatedDMYYYY,
             TimeFormat::TwelveHours,
             NumberFormat::ThousandsPointDecimalComma,
             IntervalFormat::Decimal,
@@ -47,7 +45,7 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $formatted = $this->localizationService->formatInterval($interval);
 
         // Assert
-        $this->assertSame('30,001.05', $formatted);
+        $this->assertSame('30,001.05 h', $formatted);
     }
 
     public function test_format_interval_with_type_decimal_and_number_format_thousands_space_decimal_point(): void
@@ -61,7 +59,7 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $formatted = $this->localizationService->formatInterval($interval);
 
         // Assert
-        $this->assertSame('30 001.05', $formatted);
+        $this->assertSame('30 001.05 h', $formatted);
     }
 
     public function test_format_interval_with_type_decimal_and_number_format_thousands_point_decimal_comma(): void
@@ -75,7 +73,7 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $formatted = $this->localizationService->formatInterval($interval);
 
         // Assert
-        $this->assertSame('30.001,05', $formatted);
+        $this->assertSame('30.001,05 h', $formatted);
     }
 
     public function test_format_interval_with_type_decimal_and_number_format_thousands_apostrophe_decimal_point(): void
@@ -89,7 +87,7 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $formatted = $this->localizationService->formatInterval($interval);
 
         // Assert
-        $this->assertSame('30\'001.05', $formatted);
+        $this->assertSame('30\'001.05 h', $formatted);
     }
 
     public function test_format_interval_with_type_hours_minutes(): void
@@ -105,11 +103,11 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $this->assertSame('30001h 03m', $formatted);
     }
 
-    public function test_format_interval_with_type_hours_minutes_colon_seperated(): void
+    public function test_format_interval_with_type_hours_minutes_colon_separated(): void
     {
         // Arrange
         $interval = CarbonInterval::seconds(4 + (60 * 3) + (60 * 60 * 30001));
-        $this->localizationService->setIntervalFormat(IntervalFormat::HoursMinutesColonSeperated);
+        $this->localizationService->setIntervalFormat(IntervalFormat::HoursMinutesColonSeparated);
 
         // Act
         $formatted = $this->localizationService->formatInterval($interval);
@@ -118,11 +116,11 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $this->assertSame('30001:03', $formatted);
     }
 
-    public function test_format_interval_with_type_hours_minutes_seconds_colon_seperated(): void
+    public function test_format_interval_with_type_hours_minutes_seconds_colon_separated(): void
     {
         // Arrange
         $interval = CarbonInterval::seconds(4 + (60 * 3) + (60 * 60 * 30001));
-        $this->localizationService->setIntervalFormat(IntervalFormat::HoursMinutesSecondsColonSeperated);
+        $this->localizationService->setIntervalFormat(IntervalFormat::HoursMinutesSecondsColonSeparated);
 
         // Act
         $formatted = $this->localizationService->formatInterval($interval);
@@ -215,10 +213,10 @@ class LocalizationServiceTest extends TestCaseWithDatabase
         $this->assertSame('EUR 1 234 567,89', $formatted);
     }
 
-    public function test_format_date_with_type_slash_seperated_ddmmy(): void
+    public function test_format_date_with_type_slash_separated_ddmmy(): void
     {
         // Arrange
-        $this->localizationService->setDateFormat(DateFormat::SlashSeperatedDDMMYYYY);
+        $this->localizationService->setDateFormat(DateFormat::SlashSeparatedDDMMYYYY);
         $date = Carbon::createFromDate(2001, 2, 3);
 
         // Act

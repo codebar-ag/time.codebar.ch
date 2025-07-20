@@ -123,7 +123,12 @@ export type TimeEntriesQueryParams = ZodiosQueryParamsByAlias<
 export type AggregatedTimeEntriesQueryParams = ZodiosQueryParamsByAlias<
     SolidTimeApi,
     'getAggregatedTimeEntries'
-> & { start: string; end: string };
+> & { 
+    start: string; 
+    end: string;
+    rounding_type?: string;
+    rounding_minutes?: number;
+};
 
 export type OrganizationResponse = ZodiosResponseByAlias<
     SolidTimeApi,
@@ -167,12 +172,35 @@ export type ApiTokenIndexResponse = ZodiosResponseByAlias<
     'getApiTokens'
 >;
 
-export type CreateApiTokenBody = ZodiosBodyByAlias<SolidTimeApi, 'createApiToken'>;
+export type CreateApiTokenBody = ZodiosBodyByAlias<
+    SolidTimeApi,
+    'createApiToken'
+>;
 export type ApiToken = ApiTokenIndexResponse['data'][0];
 
 export type DetailedInvoiceResponse = ZodiosResponseByAlias<
     SolidTimeApi,
     'getInvoice'
+>;
+
+export type InvoiceIndexEntry = ZodiosResponseByAlias<
+    SolidTimeApi,
+    'getInvoices'
+>['data'][0];
+
+export type UpdateInvoiceSettings = ZodiosBodyByAlias<
+    SolidTimeApi,
+    'updateInvoiceSettings'
+>;
+
+export type CreateInvoiceBody = ZodiosBodyByAlias<
+    SolidTimeApi,
+    'createInvoice'
+>;
+
+export type UpdateInvoiceBody = ZodiosBodyByAlias<
+    SolidTimeApi,
+    'updateInvoice'
 >;
 
 const api = createApiClient('/api', { validate: 'none' });

@@ -67,6 +67,7 @@ const InvoiceResource = z
         status: z.string(),
         date: z.string(),
         due_at: z.string(),
+        paid_date: z.string(),
         created_at: z.union([z.string(), z.null()]),
         updated_at: z.union([z.string(), z.null()]),
     })
@@ -76,7 +77,7 @@ const InvoiceDiscountType = z.enum(['percentage', 'fixed']);
 const InvoiceStoreRequest = z
     .object({
         due_at: z.union([z.string(), z.null()]).optional(),
-        paid_at: z.union([z.string(), z.null()]).optional(),
+        paid_date: z.union([z.string(), z.null()]).optional(),
         seller_name: z.string(),
         seller_vatin: z.union([z.string(), z.null()]).optional(),
         seller_address_line_1: z.union([z.string(), z.null()]).optional(),
@@ -102,8 +103,13 @@ const InvoiceStoreRequest = z
         billing_period_end: z.union([z.string(), z.null()]).optional(),
         reference: z.string(),
         currency: z.string(),
-        tax_rate: z.number().int().optional(),
-        discount_amount: z.number().int().optional(),
+        tax_rate: z.number().int().gte(0).lte(2147483647).optional(),
+        discount_amount: z
+            .number()
+            .int()
+            .gte(0)
+            .lte(9223372036854776000)
+            .optional(),
         discount_type: InvoiceDiscountType.optional(),
         footer: z.union([z.string(), z.null()]).optional(),
         notes: z.union([z.string(), z.null()]).optional(),
@@ -115,8 +121,12 @@ const InvoiceStoreRequest = z
                     .object({
                         name: z.string(),
                         description: z.union([z.string(), z.null()]).optional(),
-                        unit_price: z.number().int().gte(0).lte(99999999),
-                        quantity: z.number().gte(0),
+                        unit_price: z
+                            .number()
+                            .int()
+                            .gte(0)
+                            .lte(9223372036854776000),
+                        quantity: z.number().gte(0).lte(99999999),
                     })
                     .passthrough()
             )
@@ -130,7 +140,7 @@ const InvoiceEntryResource = z
         name: z.string(),
         description: z.union([z.string(), z.null()]),
         unit_price: z.number().int(),
-        quantity: z.string(),
+        quantity: z.number(),
         order_index: z.number().int(),
         created_at: z.union([z.string(), z.null()]),
         updated_at: z.union([z.string(), z.null()]),
@@ -161,11 +171,11 @@ const DetailedInvoiceResource = z
         buyer_address_country: z.string(),
         buyer_phone: z.string(),
         buyer_email: z.string(),
-        paid_at: z.union([z.string(), z.null()]),
+        paid_date: z.string(),
         due_at: z.string(),
         discount_type: z.string(),
-        discount_amount: z.string(),
-        tax_rate: z.string(),
+        discount_amount: z.number().int(),
+        tax_rate: z.number().int(),
         status: z.string(),
         currency: z.string(),
         date: z.string(),
@@ -185,7 +195,7 @@ const InvoiceUpdateRequest = z
     .object({
         status: InvoiceStatus,
         due_at: z.union([z.string(), z.null()]),
-        paid_at: z.union([z.string(), z.null()]),
+        paid_date: z.union([z.string(), z.null()]),
         seller_name: z.string(),
         seller_vatin: z.union([z.string(), z.null()]),
         seller_address_line_1: z.union([z.string(), z.null()]),
@@ -211,8 +221,8 @@ const InvoiceUpdateRequest = z
         billing_period_end: z.union([z.string(), z.null()]),
         reference: z.string(),
         currency: z.string(),
-        tax_rate: z.number().int(),
-        discount_amount: z.number().int(),
+        tax_rate: z.number().int().gte(0).lte(2147483647),
+        discount_amount: z.number().int().gte(0).lte(9223372036854776000),
         discount_type: InvoiceDiscountType,
         footer: z.union([z.string(), z.null()]),
         notes: z.union([z.string(), z.null()]),
@@ -224,8 +234,12 @@ const InvoiceUpdateRequest = z
                     id: z.union([z.string(), z.null()]).optional(),
                     name: z.string(),
                     description: z.union([z.string(), z.null()]).optional(),
-                    unit_price: z.number().int().gte(0).lte(99999999),
-                    quantity: z.number().gte(0),
+                    unit_price: z
+                        .number()
+                        .int()
+                        .gte(0)
+                        .lte(9223372036854776000),
+                    quantity: z.number().gte(0).lte(99999999),
                 })
                 .passthrough()
         ),
@@ -293,21 +307,6 @@ const MemberMergeIntoRequest = z
     .object({ member_id: z.string() })
     .partial()
     .passthrough();
-const OrganizationResource = z
-    .object({
-        id: z.string(),
-        name: z.string(),
-        is_personal: z.boolean(),
-        billable_rate: z.union([z.number(), z.null()]),
-        employees_can_see_billable_rates: z.boolean(),
-        currency: z.string(),
-        number_format: z.string(),
-        currency_format: z.string(),
-        date_format: z.string(),
-        interval_format: z.string(),
-        time_format: z.string(),
-    })
-    .passthrough();
 const NumberFormat = z.enum([
     'point-comma',
     'comma-point',
@@ -324,20 +323,36 @@ const CurrencyFormat = z.enum([
     'symbol-after-with-space',
 ]);
 const DateFormat = z.enum([
-    'point-seperated-d-m-yyyy',
-    'slash-seperated-mm-dd-yyyy',
-    'slash-seperated-dd-mm-yyyy',
-    'hyphen-seperated-dd-mm-yyyy',
-    'hyphen-seperated-mm-dd-yyyy',
-    'hyphen-seperated-yyyy-mm-dd',
+    'point-separated-d-m-yyyy',
+    'slash-separated-mm-dd-yyyy',
+    'slash-separated-dd-mm-yyyy',
+    'hyphen-separated-dd-mm-yyyy',
+    'hyphen-separated-mm-dd-yyyy',
+    'hyphen-separated-yyyy-mm-dd',
 ]);
 const IntervalFormat = z.enum([
     'decimal',
     'hours-minutes',
-    'hours-minutes-colon-seperated',
-    'hours-minutes-seconds-colon-seperated',
+    'hours-minutes-colon-separated',
+    'hours-minutes-seconds-colon-separated',
 ]);
 const TimeFormat = z.enum(['12-hours', '24-hours']);
+const OrganizationResource = z
+    .object({
+        id: z.string(),
+        name: z.string(),
+        is_personal: z.boolean(),
+        billable_rate: z.union([z.number(), z.null()]),
+        employees_can_see_billable_rates: z.boolean(),
+        currency: z.string(),
+        currency_symbol: z.string(),
+        number_format: NumberFormat,
+        currency_format: CurrencyFormat,
+        date_format: DateFormat,
+        interval_format: IntervalFormat,
+        time_format: TimeFormat,
+    })
+    .passthrough();
 const OrganizationUpdateRequest = z
     .object({
         name: z.string().max(255),
@@ -524,6 +539,12 @@ const DetailedWithDataReportResource = z
         description: z.union([z.string(), z.null()]),
         public_until: z.union([z.string(), z.null()]),
         currency: z.string(),
+        number_format: NumberFormat,
+        currency_format: CurrencyFormat,
+        currency_symbol: z.string(),
+        date_format: DateFormat,
+        interval_format: IntervalFormat,
+        time_format: TimeFormat,
         properties: z
             .object({
                 group: z.string(),
@@ -769,12 +790,12 @@ export const schemas = {
     Role,
     MemberUpdateRequest,
     MemberMergeIntoRequest,
-    OrganizationResource,
     NumberFormat,
     CurrencyFormat,
     DateFormat,
     IntervalFormat,
     TimeFormat,
+    OrganizationResource,
     OrganizationUpdateRequest,
     ProjectResource,
     ProjectStoreRequest,
@@ -812,7 +833,9 @@ const endpoints = makeApi([
         path: '/v1/countries',
         alias: 'getCountries',
         requestFormat: 'json',
-        response: z.string(),
+        response: z.array(
+            z.object({ code: z.string(), name: z.string() }).passthrough()
+        ),
         errors: [
             {
                 status: 401,
@@ -820,6 +843,21 @@ const endpoints = makeApi([
                 schema: z.object({ message: z.string() }).passthrough(),
             },
         ],
+    },
+    {
+        method: 'get',
+        path: '/v1/currencies',
+        alias: 'getCurrencies',
+        requestFormat: 'json',
+        response: z.array(
+            z
+                .object({
+                    code: z.string(),
+                    name: z.string(),
+                    symbol: z.string(),
+                })
+                .passthrough()
+        ),
     },
     {
         method: 'get',
@@ -2383,6 +2421,11 @@ const endpoints = makeApi([
                 type: 'Path',
                 schema: z.string(),
             },
+            {
+                name: 'delete_related',
+                type: 'Query',
+                schema: z.enum(['true', 'false']).optional(),
+            },
         ],
         response: z.void(),
         errors: [
@@ -2411,6 +2454,16 @@ const endpoints = makeApi([
                 status: 404,
                 description: `Not found`,
                 schema: z.object({ message: z.string() }).passthrough(),
+            },
+            {
+                status: 422,
+                description: `Validation error`,
+                schema: z
+                    .object({
+                        message: z.string(),
+                        errors: z.record(z.array(z.string())),
+                    })
+                    .passthrough(),
             },
         ],
     },

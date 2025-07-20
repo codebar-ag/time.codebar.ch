@@ -1,7 +1,8 @@
 import { expect, Page } from '@playwright/test';
 import { PLAYWRIGHT_BASE_URL } from '../playwright/config';
 import { test } from '../playwright/fixtures';
-import { formatCents } from '../resources/js/packages/ui/src/utils/money';
+import { formatCentsWithOrganizationDefaults } from './utils/money';
+import type { CurrencyFormat } from '../resources/js/packages/ui/src/utils/money';
 
 async function goToProjectsOverview(page: Page) {
     await page.goto(PLAYWRIGHT_BASE_URL + '/projects');
@@ -101,7 +102,7 @@ test('test that updating billable rate works with existing time entries', async 
 
     await page.getByRole('row').first().getByRole('button').click();
     await page.getByRole('menuitem').getByText('Edit').first().click();
-        await page.getByText('Non-Billable').click();
+    await page.getByText('Non-Billable').click();
     await page.getByText('Custom Rate').click();
     await page
         .getByPlaceholder('Billable Rate')
@@ -110,8 +111,8 @@ test('test that updating billable rate works with existing time entries', async 
 
     await Promise.all([
         page
-            .getByRole('button', { name: 'Yes, update existing time entries' })
-            .click(),
+        .locator('button').filter({ hasText: 'Yes, update existing time' })
+        .click(),    
         page.waitForRequest(
             async (request) =>
                 request.url().includes('/projects/') &&
@@ -131,7 +132,7 @@ test('test that updating billable rate works with existing time entries', async 
         page
             .getByRole('row')
             .first()
-            .getByText(formatCents(newBillableRate * 100, 'EUR'))
+            .getByText(formatCentsWithOrganizationDefaults(newBillableRate * 100))
     ).toBeVisible();
 });
 

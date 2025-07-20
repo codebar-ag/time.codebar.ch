@@ -43,6 +43,9 @@
 
     --theme-color-input-select-active: rgb(var(--color-accent-300));
     --theme-color-input-select-active-hover: rgb(var(--color-accent-200));
+
+    --color-accent-default: rgba(var(--color-accent-300), 0.2);
+    --color-accent-foreground: rgb(var(--color-accent-100));
 }
 
 :root.light {
@@ -86,6 +89,9 @@
 
     --theme-color-input-select-active: rgb(var(--color-accent-400));
     --theme-color-input-select-active-hover: rgb(var(--color-accent-500));
+
+    --color-accent-default: rgb(var(--color-accent-100));
+    --color-accent-foreground: rgb(var(--color-accent-800));
 }
 
 :root {
@@ -154,30 +160,17 @@ body {
 }
 
 
+/* Inter Variable Font with browser compatibility considerations */
 @font-face {
-    font-family: 'Outfit';
-    src: url('/fonts/Outfit-Regular.ttf');
-    font-weight: 400;
-}
-@font-face {
-    font-family: 'Outfit';
-    src: url('/fonts/Outfit-Medium.ttf');
-    font-weight: 500;
-}
-@font-face {
-    font-family: 'Outfit';
-    src: url('/fonts/Outfit-SemiBold.ttf');
-    font-weight: 600;
-}
-@font-face {
-    font-family: 'Outfit';
-    src: url('/fonts/Outfit-Bold.ttf');
-    font-weight: 700;
-}
-@font-face {
-    font-family: 'Outfit';
-    src: url('/fonts/Outfit-ExtraBold.ttf');
-    font-weight: 800;
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Variable.woff2') format('woff2 supports variations'),
+         url('/fonts/Inter-Variable.woff2') format('woff2-variations'),
+         url('/fonts/Inter-Variable.ttf') format('truetype supports variations'),
+         url('/fonts/Inter-Variable.ttf') format('truetype-variations');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
 @layer base {
@@ -199,7 +192,7 @@ body {
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: var(--color-text-primary);
         --border: var(--color-border-primary);
-        --input: var(--theme-color-input-background);
+        --input: var(--color-border-tertiary);
         --ring: var(--theme-color-ring);
         --chart-1: var(--color-accent-400);
         --chart-2: var(--color-accent-500);
@@ -226,7 +219,7 @@ body {
         --destructive: 0 62.8% 30.6%;
         --destructive-foreground: var(--color-text-primary);
         --border: var(--color-border-primary);
-        --input: var(--theme-color-input-background);
+        --input: var(--color-border-tertiary);
         --ring: var(--theme-color-ring);
         --chart-1: var(--color-accent-200);
         --chart-2: var(--color-accent-300);

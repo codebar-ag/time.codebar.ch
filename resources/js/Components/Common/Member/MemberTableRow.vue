@@ -1,32 +1,37 @@
 <script setup lang="ts">
-import type { Member } from '@/packages/api/src';
+import type { Member, Organization } from '@/packages/api/src';
+import { api } from '@/packages/api/src';
 import { CheckCircleIcon, UserCircleIcon } from '@heroicons/vue/20/solid';
 import MemberMoreOptionsDropdown from '@/Components/Common/Member/MemberMoreOptionsDropdown.vue';
 import TableRow from '@/Components/TableRow.vue';
-import { capitalizeFirstLetter } from '../../../utils/format';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
-import { api } from '@/packages/api/src';
 import { getCurrentOrganizationId } from '@/utils/useUser';
 import { useNotificationsStore } from '@/utils/notification';
 import { canInvitePlaceholderMembers } from '@/utils/permissions';
-import { useMembersStore } from '@/utils/useMembers';
-import {computed, ref} from 'vue';
+import { computed, type ComputedRef, inject, ref } from 'vue';
 import MemberEditModal from '@/Components/Common/Member/MemberEditModal.vue';
-import { getOrganizationCurrencyString } from '@/utils/money';
-import { formatCents } from '@/packages/ui/src/utils/money';
-import MemberMergeModal from "@/Components/Common/Member/MemberMergeModal.vue";
-import MemberMakePlaceholderModal from "@/Components/Common/Member/MemberMakePlaceholderModal.vue";
+import MemberMergeModal from '@/Components/Common/Member/MemberMergeModal.vue';
+import MemberMakePlaceholderModal from '@/Components/Common/Member/MemberMakePlaceholderModal.vue';
+import MemberDeleteModal from '@/Components/Common/Member/MemberDeleteModal.vue';
+import { capitalizeFirstLetter } from '../../../utils/format';
+import { formatCents } from '../../../packages/ui/src/utils/money';
+import { useMembersStore } from '@/utils/useMembers';
 
 const props = defineProps<{
     member: Member;
 }>();
 
+const organization = inject<ComputedRef<Organization>>('organization');
+const memberStore = useMembersStore();
+
 const showEditMemberModal = ref(false);
 const showMergeMemberModal = ref(false);
 const showMakeMemberPlaceholderModal = ref(false);
+const showDeleteMemberModal = ref(false);
 
 function removeMember() {
-    useMembersStore().removeMember(props.member.id);
+    showDeleteMemberModal.value = true;
+    memberStore.fetchMembers();
 }
 
 async function invitePlaceholder(id: string) {
@@ -35,15 +40,12 @@ async function invitePlaceholder(id: string) {
     if (organizationId) {
         await handleApiRequestNotifications(
             () =>
-                api.invitePlaceholder(
-                    undefined,
-                    {
-                        params: {
-                            organization: organizationId,
-                            member: id,
-                        },
-                    }
-                ),
+                api.invitePlaceholder(undefined, {
+                    params: {
+                        organization: organizationId,
+                        member: id,
+                    },
+                }),
             'Member invited successfully',
             'Error inviting member'
         );
@@ -52,8 +54,7 @@ async function invitePlaceholder(id: string) {
 
 const userHasValidMailAddress = computed(() => {
     return !props.member.email.endsWith('@solidtime-import.test');
-})
-
+});
 </script>
 
 <template>
@@ -75,7 +76,10 @@ const userHasValidMailAddress = computed(() => {
                 member.billable_rate
                     ? formatCents(
                           member.billable_rate,
-                          getOrganizationCurrencyString()
+                          organization?.currency,
+                          organization?.currency_format,
+                          organization?.currency_symbol,
+                          organization?.number_format
                       )
                     : '--'
             }}
@@ -101,21 +105,29 @@ const userHasValidMailAddress = computed(() => {
                 "
                 size="small"
                 @click="invitePlaceholder(member.id)"
-                >Invite</SecondaryButton
-            >
+                >Invite
+            </SecondaryButton>
             <MemberMoreOptionsDropdown
                 :member="member"
                 @edit="showEditMemberModal = true"
                 @delete="removeMember"
                 @merge="showMergeMemberModal = true"
-                @make-placeholder="showMakeMemberPlaceholderModal = true"
-            ></MemberMoreOptionsDropdown>
+                @make-placeholder="
+                    showMakeMemberPlaceholderModal = true
+                "></MemberMoreOptionsDropdown>
         </div>
         <MemberEditModal
             v-model:show="showEditMemberModal"
             :member="member"></MemberEditModal>
-        <MemberMergeModal v-model:show="showMergeMemberModal" :member="member"></MemberMergeModal>
-        <MemberMakePlaceholderModal v-model:show="showMakeMemberPlaceholderModal" :member="member"></MemberMakePlaceholderModal>
+        <MemberMergeModal
+            v-model:show="showMergeMemberModal"
+            :member="member"></MemberMergeModal>
+        <MemberMakePlaceholderModal
+            v-model:show="showMakeMemberPlaceholderModal"
+            :member="member"></MemberMakePlaceholderModal>
+        <MemberDeleteModal
+            v-model:show="showDeleteMemberModal"
+            :member="member"></MemberDeleteModal>
     </TableRow>
 </template>
 
