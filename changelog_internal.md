@@ -244,6 +244,135 @@ Removed redundant status column from members table to maintain consistency with 
 
 **Result:** Members table now shows: Name → Email → Role → Billable Rate → Edit
 
+### Add Search/Filter Functionality to Projects and Clients Pages
+
+Added real-time search functionality with wildcard matching to improve user experience.
+
+#### Projects Page Search
+
+**File:** `resources/js/Pages/Projects.vue`
+
+**Added imports:**
+```js
+import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
+```
+
+**Added search state:**
+```js
+const searchQuery = ref('');
+```
+
+**Updated filtering logic:**
+```js
+const shownProjects = computed(() => {
+    let filteredProjects = projects.value.filter((project) => {
+        if (activeTab.value === 'active') {
+            return !project.is_archived;
+        }
+        return project.is_archived;
+    });
+
+    // Apply search filter
+    if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase().trim();
+        filteredProjects = filteredProjects.filter((project) => {
+            // Search in project name
+            const projectNameMatch = project.name.toLowerCase().includes(query);
+            
+            // Search in client name
+            const client = clients.value.find(client => client.id === project.client_id);
+            const clientNameMatch = client?.name.toLowerCase().includes(query) || false;
+            
+            return projectNameMatch || clientNameMatch;
+        });
+    }
+
+    return filteredProjects;
+});
+```
+
+**Added search input UI:**
+```vue
+<div class="flex items-center space-x-3">
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
+        </div>
+        <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search projects or clients..."
+            class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm"
+        />
+    </div>
+    <SecondaryButton>Create Project</SecondaryButton>
+</div>
+```
+
+#### Clients Page Search
+
+**File:** `resources/js/Pages/Clients.vue`
+
+**Added imports:**
+```js
+import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
+```
+
+**Added search state:**
+```js
+const searchQuery = ref('');
+```
+
+**Updated filtering logic:**
+```js
+const shownClients = computed(() => {
+    let filteredClients = clients.value.filter((client) => {
+        if (activeTab.value === 'active') {
+            return !client.is_archived;
+        }
+        return client.is_archived;
+    });
+
+    // Apply search filter
+    if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase().trim();
+        filteredClients = filteredClients.filter((client) => {
+            return client.name.toLowerCase().includes(query);
+        });
+    }
+
+    return filteredClients;
+});
+```
+
+**Added search input UI:**
+```vue
+<div class="flex items-center space-x-3">
+    <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
+        </div>
+        <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search clients..."
+            class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm"
+        />
+    </div>
+    <SecondaryButton>Create Client</SecondaryButton>
+</div>
+```
+
+#### Features
+
+- **Real-time filtering:** Results update as you type
+- **Wildcard search:** Substring/partial matching
+- **Projects page:** Searches both project names AND client names
+- **Clients page:** Searches client names
+- **Case-insensitive:** Search works regardless of capitalization
+- **Works with tabs:** Search applies to both Active and Archived tabs
+- **Clean UI:** Search input with magnifying glass icon, positioned next to action buttons
+
 ### Remove Pull Request Template
 
 **File:** `.github/PULL_REQUEST_TEMPLATE.md`
