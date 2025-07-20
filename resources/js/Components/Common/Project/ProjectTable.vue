@@ -38,7 +38,7 @@ async function createClient(
 const { clients } = storeToRefs(useClientsStore());
 
 const gridTemplate = computed(() => {
-    return `grid-template-columns: minmax(300px, 1fr) minmax(150px, auto) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} 80px;`;
+    return `grid-template-columns: minmax(150px, auto) minmax(300px, 1fr) minmax(140px, auto) minmax(130px, auto) ${props.showBillableRate ? 'minmax(130px, auto)' : ''} 80px;`;
 });
 import { isAllowedToPerformPremiumAction } from '@/utils/billing';
 

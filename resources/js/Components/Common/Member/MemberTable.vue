@@ -18,7 +18,7 @@ onMounted(async () => {
             <div
                 data-testid="client_table"
                 class="grid min-w-full"
-                style="grid-template-columns: 1fr 1fr 180px 180px 150px 130px">
+                style="grid-template-columns: 1fr 1fr 180px 180px 130px">
                 <MemberTableHeading></MemberTableHeading>
                 <template v-for="member in members" :key="member.id">
                     <MemberTableRow :member="member"></MemberTableRow>
