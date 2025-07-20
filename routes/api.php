@@ -43,7 +43,6 @@ Route::prefix('v1')->name('v1.')->group(static function (): void {
         // Organization routes
         Route::name('organizations.')->group(static function (): void {
             Route::get('/organizations/{organization}', [OrganizationController::class, 'show'])->name('show');
-            Route::get('/organizations/{organization}/counts', [OrganizationController::class, 'getCounts'])->name('counts');
             Route::put('/organizations/{organization}', [OrganizationController::class, 'update'])->name('update');
         });
 
@@ -89,7 +88,7 @@ Route::prefix('v1')->name('v1.')->group(static function (): void {
             Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('show');
             Route::post('/projects', [ProjectController::class, 'store'])->name('store')->middleware('check-organization-blocked');
             Route::put('/projects/{project}', [ProjectController::class, 'update'])->name('update')->middleware('check-organization-blocked');
-            Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy'); // @otod uncommented
+            Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('destroy');
         });
 
         // Project member routes
@@ -153,7 +152,7 @@ Route::prefix('v1')->name('v1.')->group(static function (): void {
             Route::get('/clients', [ClientController::class, 'index'])->name('index');
             Route::post('/clients', [ClientController::class, 'store'])->name('store')->middleware('check-organization-blocked');
             Route::put('/clients/{client}', [ClientController::class, 'update'])->name('update')->middleware('check-organization-blocked');
-            Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('destroy'); // @otod uncommented
+            Route::delete('/clients/{client}', [ClientController::class, 'destroy'])->name('destroy');
         });
 
         // Task routes

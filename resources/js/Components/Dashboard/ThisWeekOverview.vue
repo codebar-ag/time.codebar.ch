@@ -18,7 +18,7 @@ import ProjectsChartCard from '@/Components/Dashboard/ProjectsChartCard.vue';
 import { formatHumanReadableDuration } from '@/packages/ui/src/utils/time';
 import { formatCents } from '@/packages/ui/src/utils/money';
 import { getWeekStart } from '@/packages/ui/src/utils/settings';
-import { useCssVar } from '@vueuse/core';
+import { useCssVariable } from '@/utils/useCssVariable';
 import { getOrganizationCurrencyString } from '@/utils/money';
 import { useQuery } from '@tanstack/vue-query';
 import { getCurrentOrganizationId } from '@/utils/useUser';
@@ -60,7 +60,7 @@ const weekdays = computed(() => {
     }
 });
 
-const accentColor = useCssVar('--theme-color-chart', null, { observe: true });
+const accentColor = useCssVariable('--theme-color-chart');
 
 // Get the organization ID using the utility function
 const organizationId = computed(() => getCurrentOrganizationId());
@@ -176,10 +176,8 @@ const seriesData = computed(() => {
     });
 });
 
-const markLineColor = useCssVar('--color-border-secondary', null, {
-    observe: true,
-});
-const labelColor = useCssVar('--color-text-secondary', null, { observe: true });
+const markLineColor = useCssVariable('--color-border-secondary');
+const labelColor = useCssVariable('--color-text-secondary');
 const option = computed(() => {
     return {
         tooltip: {
@@ -204,7 +202,7 @@ const option = computed(() => {
                 fontSize: 16,
                 fontWeight: 600,
                 margin: 24,
-                fontFamily: 'Outfit, sans-serif',
+                fontFamily: 'Inter, sans-serif',
                 color: labelColor.value,
             },
             axisTick: {
@@ -215,6 +213,10 @@ const option = computed(() => {
         },
         yAxis: {
             type: 'value',
+            axisLabel: {
+                color: labelColor.value,
+                fontFamily: 'Inter, sans-serif',
+            },
             splitLine: {
                 lineStyle: {
                     color: markLineColor.value,
