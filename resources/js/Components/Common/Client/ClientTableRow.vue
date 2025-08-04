@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Client } from '@/packages/api/src';
 import { computed, ref } from 'vue';
-import { CheckCircleIcon } from '@heroicons/vue/20/solid';
 import { useClientsStore } from '@/utils/useClients';
 import { storeToRefs } from 'pinia';
 import ClientMoreOptionsDropdown from '@/Components/Common/Client/ClientMoreOptionsDropdown.vue';
