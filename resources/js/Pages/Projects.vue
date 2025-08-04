@@ -47,7 +47,7 @@ const shownProjects = computed(() => {
         const query = searchQuery.value.toLowerCase().trim();
 
         // Create clients map for O(1) lookup performance
-        const clientsMap = new Map(clients.value.map(c => [c.id, c]));
+        const clientsMap = new Map(clients.value.map((c) => [c.id, c]));
 
         filteredProjects = filteredProjects.filter((project) => {
             // Search in project name
@@ -90,15 +90,15 @@ const showBillableRate = computed(() => {
             </div>
             <div class="flex items-center space-x-3">
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div
+                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
                     </div>
                     <input
                         v-model="searchQuery"
                         type="text"
                         placeholder="Search projects or clients..."
-                        class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm"
-                    />
+                        class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm" />
                 </div>
                 <SecondaryButton
                     v-if="canCreateProjects()"

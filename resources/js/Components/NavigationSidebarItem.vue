@@ -11,7 +11,7 @@ const props = defineProps<{
     current?: boolean;
     href: string;
     count?: number;
-    subItems?: { title: string; route: string, show: boolean }[];
+    subItems?: { title: string; route: string; show: boolean }[];
 }>();
 
 const open = useSessionStorage('nav-collapse-state-' + props.title, true);

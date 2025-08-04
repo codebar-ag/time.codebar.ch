@@ -4,8 +4,7 @@ import TableHeading from '@/Components/Common/TableHeading.vue';
 
 <template>
     <TableHeading>
-        <div
-            class="px-3 py-1.5 text-left font-semibold text-text-primary pl-4 sm:pl-6 lg:pl-8">
+        <div class="px-3 py-1.5 text-left font-semibold text-text-primary pl-4 sm:pl-6 lg:pl-8">
             Email
         </div>
         <div class="px-3 py-1.5 text-left font-semibold text-text-primary">Role</div>

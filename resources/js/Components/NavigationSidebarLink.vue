@@ -34,7 +34,10 @@ defineProps<{
             </div>
             <div
                 v-if="count !== undefined && count >= 0"
-                :class="[ current ? 'text-icon-active' : 'text-icon-default group-hover:text-icon-active','transition h-4 w-4 shrink-0']"
+                :class="[
+                    current ? 'text-icon-active' : 'text-icon-default group-hover:text-icon-active',
+                    'transition h-4 w-4 shrink-0',
+                ]"
                 aria-hidden="true" />
             {{ title }}
         </div>

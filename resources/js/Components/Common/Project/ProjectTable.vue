@@ -34,20 +34,20 @@ const gridTemplate = computed(() => {
 import { isAllowedToPerformPremiumAction } from '@/utils/billing';
 
 const sortedProjects = computed(() => {
-  return [...props.projects].sort((a, b) => {
-    // Get client names, handling null clients
-    const clientA = clients.value.find(client => client.id === a.client_id)?.name || '';
-    const clientB = clients.value.find(client => client.id === b.client_id)?.name || '';
-    
-    // First sort by client name
-    const clientComparison = clientA.localeCompare(clientB);
-    if (clientComparison !== 0) {
-      return clientComparison;
-    }
-    
-    // Then sort by project name
-    return a.name.localeCompare(b.name);
-  });
+    return [...props.projects].sort((a, b) => {
+        // Get client names, handling null clients
+        const clientA = clients.value.find((client) => client.id === a.client_id)?.name || '';
+        const clientB = clients.value.find((client) => client.id === b.client_id)?.name || '';
+
+        // First sort by client name
+        const clientComparison = clientA.localeCompare(clientB);
+        if (clientComparison !== 0) {
+            return clientComparison;
+        }
+
+        // Then sort by project name
+        return a.name.localeCompare(b.name);
+    });
 });
 </script>
 

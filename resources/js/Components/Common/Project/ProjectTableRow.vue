@@ -72,9 +72,7 @@ const showEditProjectModal = ref(false);
     <TableRow :href="route('projects.show', { project: project.id })">
         <div
             class="whitespace-nowrap min-w-0 px-3 py-4 text-sm text-text-secondary pl-4 sm:pl-6 lg:pl-8">
-            <div
-                v-if="project.client_id"
-                class="overflow-ellipsis overflow-hidden">
+            <div v-if="project.client_id" class="overflow-ellipsis overflow-hidden">
                 {{ client?.name }}
             </div>
             <div v-else>No client</div>

@@ -41,8 +41,7 @@ const showEditModal = ref(false);
                 {{ client.name }}
             </span>
         </div>
-        <div
-            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
+        <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
             <span> {{ projectCount }} Projects </span>
         </div>
         <div

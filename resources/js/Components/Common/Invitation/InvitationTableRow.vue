@@ -53,8 +53,7 @@ async function resendInvitation() {
 
 <template>
     <TableRow>
-        <div
-            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary pl-4 sm:pl-6 lg:pl-8">
+        <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary pl-4 sm:pl-6 lg:pl-8">
             {{ invitation.email }}
         </div>
         <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">

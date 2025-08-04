@@ -10,13 +10,13 @@ import ClientTableHeading from '@/Components/Common/Client/ClientTableHeading.vu
 import { canCreateClients } from '@/utils/permissions';
 
 const props = defineProps<{
-  clients: Client[];
+    clients: Client[];
 }>();
 
 const createClient = ref(false);
 
 const sortedClients = computed(() => {
-  return [...props.clients].sort((a, b) => a.name.localeCompare(b.name));
+    return [...props.clients].sort((a, b) => a.name.localeCompare(b.name));
 });
 </script>
 
