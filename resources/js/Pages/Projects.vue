@@ -14,12 +14,7 @@ import TabBarItem from '@/Components/Common/TabBar/TabBarItem.vue';
 import TabBar from '@/Components/Common/TabBar/TabBar.vue';
 import { storeToRefs } from 'pinia';
 import { useClientsStore } from '@/utils/useClients';
-import type {
-    CreateClientBody,
-    Client,
-    CreateProjectBody,
-    Project,
-} from '@/packages/api/src';
+import type { CreateClientBody, Client, CreateProjectBody, Project } from '@/packages/api/src';
 import { getOrganizationCurrencyString } from '@/utils/money';
 import { getCurrentRole } from '@/utils/useUser';
 import { useOrganizationStore } from '@/utils/useOrganization';
@@ -50,40 +45,34 @@ const shownProjects = computed(() => {
     // Apply search filter
     if (searchQuery.value.trim()) {
         const query = searchQuery.value.toLowerCase().trim();
-        
+
         // Create clients map for O(1) lookup performance
         const clientsMap = new Map(clients.value.map(c => [c.id, c]));
-        
+
         filteredProjects = filteredProjects.filter((project) => {
             // Search in project name
             const projectNameMatch = project.name.toLowerCase().includes(query);
-            
+
             // Search in client name
             const client = project.client_id ? clientsMap.get(project.client_id) : null;
             const clientNameMatch = client?.name.toLowerCase().includes(query) || false;
-            
+
             return projectNameMatch || clientNameMatch;
         });
     }
 
     return filteredProjects;
 });
-
-async function createProject(
-    project: CreateProjectBody
-): Promise<Project | undefined> {
+async function createProject(project: CreateProjectBody): Promise<Project | undefined> {
     return await useProjectsStore().createProject(project);
 }
-async function createClient(
-    client: CreateClientBody
-): Promise<Client | undefined> {
+async function createClient(client: CreateClientBody): Promise<Client | undefined> {
     return await useClientsStore().createClient(client);
 }
 
 const showBillableRate = computed(() => {
     return !!(
-        getCurrentRole() !== 'employee' ||
-        organization.value?.employees_can_see_billable_rates
+        getCurrentRole() !== 'employee' || organization.value?.employees_can_see_billable_rates
     );
 });
 </script>
@@ -94,16 +83,9 @@ const showBillableRate = computed(() => {
             class="py-3 sm:py-5 border-b border-default-background-separator flex justify-between items-center">
             <div class="flex items-center space-x-3 sm:space-x-6">
                 <PageTitle :icon="FolderIcon" title="Projects"></PageTitle>
-                <TabBar
-                v-model="activeTab"
-                >
-                    <TabBarItem
-                        value="active"
-                        >Active</TabBarItem
-                    >
-                    <TabBarItem
-                        value="archived"
-                        >Archived</TabBarItem>
+                <TabBar v-model="activeTab">
+                    <TabBarItem value="active">Active</TabBarItem>
+                    <TabBarItem value="archived">Archived</TabBarItem>
                 </TabBar>
             </div>
             <div class="flex items-center space-x-3">

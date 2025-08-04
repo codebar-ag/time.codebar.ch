@@ -34,14 +34,9 @@ defineProps<{
             </div>
             <div
                 v-if="count !== undefined && count >= 0"
-                :class="[
-                    current
-                        ? 'bg-background text-text-secondary'
-                        : 'bg-default-background text-text-tertiary group-hover:bg-background group-hover:text-text-secondary',
-                    'transition rounded-full px-1.5 py-0.5 text-xs font-medium min-w-5 text-center leading-none',
-                ]">
-                {{ count > 99 ? '99+' : count }}
-            </div>
+                :class="[ current ? 'text-icon-active' : 'text-icon-default group-hover:text-icon-active','transition h-4 w-4 shrink-0']"
+                aria-hidden="true" />
+            {{ title }}
         </div>
     </Link>
 </template>

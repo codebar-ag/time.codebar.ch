@@ -52,18 +52,9 @@ const shownClients = computed(() => {
             class="py-5 border-b border-default-background-separator flex justify-between items-center">
             <div class="flex items-center space-x-3 sm:space-x-6">
                 <PageTitle :icon="UserCircleIcon" title="Clients"> </PageTitle>
-                <TabBar
-                v-model="activeTab"
-                >
-                    <TabBarItem
-                        value="active"
-                        >Active</TabBarItem
-                    >
-                    <TabBarItem
-                        value="archived"
-                        >
-                        Archived
-                    </TabBarItem>
+                <TabBar v-model="activeTab">
+                    <TabBarItem value="active">Active</TabBarItem>
+                    <TabBarItem value="archived"> Archived </TabBarItem>
                 </TabBar>
             </div>
             <div class="flex items-center space-x-3">
@@ -78,12 +69,9 @@ const shownClients = computed(() => {
                         class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm"
                     />
                 </div>
-                <SecondaryButton
-                    v-if="canCreateClients()"
-                    :icon="PlusIcon"
-                    @click="createClient = true"
-                    >Create Client</SecondaryButton
-                >
+                <SecondaryButton v-if="canCreateClients()" :icon="PlusIcon" @click="createClient = true">
+                Create Client
+                </SecondaryButton>
             </div>
             <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
         </MainContainer>
