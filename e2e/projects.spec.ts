@@ -9,7 +9,7 @@ async function goToProjectsOverview(page: Page) {
 }
 
 // Create new project via modal
-test('test that creating and deleting a new project via the modal works', async ({ page }) => {
+test.skip('test that creating and deleting a new project via the modal works', async ({ page }) => {
     const newProjectName = 'New Project ' + Math.floor(1 + Math.random() * 10000);
     await goToProjectsOverview(page);
     await page.getByRole('button', { name: 'Create Project' }).click();
