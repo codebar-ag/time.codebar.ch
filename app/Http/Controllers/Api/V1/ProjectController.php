@@ -27,6 +27,7 @@ class ProjectController extends Controller
     protected function checkPermission(Organization $organization, string $permission, ?Project $project = null): void
     {
         parent::checkPermission($organization, $permission);
+
         if ($project !== null && $project->organization_id !== $organization->id) {
             throw new AuthorizationException('Project does not belong to organization');
         }
@@ -167,21 +168,22 @@ class ProjectController extends Controller
     {
         return response()->json(null, 204);
 
-        $this->checkPermission($organization, 'projects:delete', $project);
+        // $this->checkPermission($organization, 'projects:delete', $project);
 
-        if ($project->tasks()->exists()) {
-            throw new EntityStillInUseApiException('project', 'task');
-        }
-        if ($project->timeEntries()->exists()) {
-            throw new EntityStillInUseApiException('project', 'time_entry');
-        }
+        // if ($project->tasks()->exists()) {
+        //     throw new EntityStillInUseApiException('project', 'task');
+        // }
+        // if ($project->timeEntries()->exists()) {
+        //     throw new EntityStillInUseApiException('project', 'time_entry');
+        // }
 
-        DB::transaction(function () use (&$project): void {
-            $project->members->each(function (ProjectMember $member): void {
-                $member->delete();
-            });
-            $project->delete();
-        });
+        // DB::transaction(function () use (&$project): void {
+        //     $project->members->each(function (ProjectMember $member): void {
+        //         $member->delete();
+        //     });
+        //     $project->delete();
+        // });
 
+        // return response()->json(null, 204);
     }
 }

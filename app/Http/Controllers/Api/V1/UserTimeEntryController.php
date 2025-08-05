@@ -67,7 +67,7 @@ class UserTimeEntryController extends Controller
             return response()->json([
                 'data' => null,
                 'message' => 'No active time entry',
-            ], 200);
+            ], 404);
         }
     }
 }
