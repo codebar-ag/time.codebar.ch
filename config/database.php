@@ -96,12 +96,11 @@ return [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
             'read' => [
-                'host' => env('DB_READ_HOST', env('DB_HOST')),
+                'host' => env('DB_READ_HOST', env('DB_HOST', '127.0.0.1')),
             ],
             'write' => [
-                'host' => env('DB_WRITE_HOST', env('DB_HOST')),
+                'host' => env('DB_WRITE_HOST', env('DB_HOST', '127.0.0.1')),
             ],
-            // 'host' => env('DB_TEST_HOST', '127.0.0.1'),
             'port' => env('DB_TEST_PORT', '5432'),
             'database' => env('DB_TEST_DATABASE', 'forge'),
             'username' => env('DB_TEST_USERNAME', 'forge'),
