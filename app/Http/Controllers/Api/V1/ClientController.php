@@ -103,9 +103,9 @@ class ClientController extends Controller
      */
     public function destroy(Organization $organization, Client $client): JsonResponse
     {
-        return response()->json(null, 204);
-
         $this->checkPermission($organization, 'clients:delete', $client);
+
+        return response()->json(null, 204);
 
         if ($client->projects()->exists()) {
             throw new EntityStillInUseApiException('client', 'project');
@@ -113,5 +113,6 @@ class ClientController extends Controller
 
         $client->delete();
 
+        return response()->json(null, 204);
     }
 }
