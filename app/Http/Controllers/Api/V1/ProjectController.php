@@ -166,24 +166,24 @@ class ProjectController extends Controller
      */
     public function destroy(Organization $organization, Project $project): JsonResponse
     {
-        $this->checkPermission($organization, 'projects:delete', $project);
-
-        if ($project->tasks()->exists()) {
-            throw new EntityStillInUseApiException('project', 'task');
-        }
-        if ($project->timeEntries()->exists()) {
-            throw new EntityStillInUseApiException('project', 'time_entry');
-        }
-
         return response()->json(null, 204);
 
-        DB::transaction(function () use (&$project): void {
-            $project->members->each(function (ProjectMember $member): void {
-                $member->delete();
-            });
-            $project->delete();
-        });
+        // $this->checkPermission($organization, 'projects:delete', $project);
 
-        return response()->json(null, 204);
+        // if ($project->tasks()->exists()) {
+        //     throw new EntityStillInUseApiException('project', 'task');
+        // }
+        // if ($project->timeEntries()->exists()) {
+        //     throw new EntityStillInUseApiException('project', 'time_entry');
+        // }
+
+        // DB::transaction(function () use (&$project): void {
+        //     $project->members->each(function (ProjectMember $member): void {
+        //         $member->delete();
+        //     });
+        //     $project->delete();
+        // });
+
+        // return response()->json(null, 204);
     }
 }
