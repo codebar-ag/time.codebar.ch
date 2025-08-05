@@ -105,13 +105,14 @@ class ClientController extends Controller
     {
         return response()->json(null, 204);
 
-        $this->checkPermission($organization, 'clients:delete', $client);
+        // $this->checkPermission($organization, 'clients:delete', $client);
 
-        if ($client->projects()->exists()) {
-            throw new EntityStillInUseApiException('client', 'project');
-        }
+        // if ($client->projects()->exists()) {
+        //     throw new EntityStillInUseApiException('client', 'project');
+        // }
 
-        $client->delete();
+        // $client->delete();
 
+        // return response()->json(null, 204);
     }
 }

@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { type Component } from 'vue';
 import NavigationSidebarLink from '@/Components/NavigationSidebarLink.vue';
-import {
-    CollapsibleContent,
-    CollapsibleRoot,
-    CollapsibleTrigger,
-} from 'radix-vue';
+import { CollapsibleContent, CollapsibleRoot, CollapsibleTrigger } from 'radix-vue';
 import { useSessionStorage } from '@vueuse/core';
 import { ChevronRightIcon } from '@heroicons/vue/20/solid';
 
@@ -15,7 +11,7 @@ const props = defineProps<{
     current?: boolean;
     href: string;
     count?: number;
-    subItems?: { title: string; route: string, show: boolean }[];
+    subItems?: { title: string; route: string; show: boolean }[];
 }>();
 
 const open = useSessionStorage('nav-collapse-state-' + props.title, true);
@@ -83,9 +79,7 @@ const open = useSessionStorage('nav-collapse-state-' + props.title, true);
                                 v-if="subItem.show"
                                 :title="subItem.title"
                                 :current="route().current(subItem.route)"
-                                :href="
-                                    route(subItem.route)
-                                "></NavigationSidebarLink>
+                                :href="route(subItem.route)"></NavigationSidebarLink>
                         </li>
                     </ul>
                 </div>
