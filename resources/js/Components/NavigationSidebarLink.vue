@@ -28,7 +28,9 @@ defineProps<{
                 ]"
                 aria-hidden="true" />
             <span class="flex-1 truncate">{{ title }}</span>
-            <span v-if="typeof count !== 'undefined'" class="ml-2 px-1.5 rounded bg-quaternary text-text-tertiary text-[10px] leading-5 min-w-[1.25rem] text-center">
+            <span
+                v-if="typeof count !== 'undefined'"
+                class="ml-2 px-1.5 rounded bg-quaternary text-text-tertiary text-[10px] leading-5 min-w-[1.25rem] text-center">
                 {{ count }}
             </span>
         </div>

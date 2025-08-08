@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Client } from '@/packages/api/src';
 import { computed, ref } from 'vue';
-import { CheckCircleIcon } from '@heroicons/vue/20/solid';
 import { useClientsStore } from '@/utils/useClients';
 import { storeToRefs } from 'pinia';
 import ClientMoreOptionsDropdown from '@/Components/Common/Client/ClientMoreOptionsDropdown.vue';
@@ -34,7 +33,8 @@ const showEditModal = ref(false);
 <template>
     <TableRow>
         <ClientEditModal v-model:show="showEditModal" :client="client"></ClientEditModal>
-        <div class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
+        <div
+            class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
             <span>{{ client.name }}</span>
         </div>
         <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
@@ -48,8 +48,7 @@ const showEditModal = ref(false);
             <ClientMoreOptionsDropdown
                 :client="client"
                 @edit="showEditModal = true"
-                @archive="archiveClient"
-            ></ClientMoreOptionsDropdown>
+                @archive="archiveClient"></ClientMoreOptionsDropdown>
         </div>
     </TableRow>
 </template>

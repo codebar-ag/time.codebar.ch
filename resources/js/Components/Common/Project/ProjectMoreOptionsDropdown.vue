@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { TrashIcon, PencilSquareIcon, ArchiveBoxIcon } from '@heroicons/vue/20/solid';
+import { PencilSquareIcon, ArchiveBoxIcon } from '@heroicons/vue/20/solid';
 import type { Project } from '@/packages/api/src';
-import { canDeleteProjects, canUpdateProjects } from '@/utils/permissions';
+import { canUpdateProjects } from '@/utils/permissions';
 import {
     DropdownMenu,
     DropdownMenuContent,

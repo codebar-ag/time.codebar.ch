@@ -221,7 +221,8 @@ const groupedPieChartData = computed(() => {
                 color = '#CCCCCC';
             } else if (aggregatedTableTimeEntries.value?.grouped_type === 'project') {
                 color =
-                    projects.value?.find((project: Project) => project.id === entry.key)?.color ?? '#CCCCCC';
+                    projects.value?.find((project: Project) => project.id === entry.key)?.color ??
+                    '#CCCCCC';
             }
             return {
                 value: entry.seconds,

@@ -2,7 +2,6 @@
 import ProjectMoreOptionsDropdown from '@/Components/Common/Project/ProjectMoreOptionsDropdown.vue';
 import type { Project } from '@/packages/api/src';
 import { computed, ref, inject, type ComputedRef } from 'vue';
-import { CheckCircleIcon } from '@heroicons/vue/20/solid';
 import { useClientsStore } from '@/utils/useClients';
 import { storeToRefs } from 'pinia';
 import { useTasksStore } from '@/utils/useTasks';
@@ -44,7 +43,7 @@ function archiveProject() {
 
 const organization = inject<ComputedRef<Organization>>('organization');
 
-const billableRateInfo = computed(() => {
+const _billableRateInfo = computed(() => {
     if (props.project.is_billable) {
         if (props.project.billable_rate) {
             return formatCents(
@@ -69,7 +68,8 @@ const showEditProjectModal = ref(false);
         v-model:show="showEditProjectModal"
         :original-project="project"></ProjectEditModal>
     <TableRow :href="route('projects.show', { project: project.id })">
-        <div class="whitespace-nowrap flex items-center space-x-3 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
+        <div
+            class="whitespace-nowrap flex items-center space-x-3 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
             <div
                 :style="{
                     backgroundColor: project.color,
@@ -114,8 +114,7 @@ const showEditProjectModal = ref(false);
             <ProjectMoreOptionsDropdown
                 :project="project"
                 @edit="showEditProjectModal = true"
-                @archive="archiveProject"
-            ></ProjectMoreOptionsDropdown>
+                @archive="archiveProject"></ProjectMoreOptionsDropdown>
         </div>
     </TableRow>
 </template>

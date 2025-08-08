@@ -23,10 +23,10 @@ const createClient = ref(false);
     <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
     <div class="flow-root max-w-[100vw] overflow-x-auto">
         <div class="inline-block min-w-full align-middle">
-                <div
-                    data-testid="client_table"
-                    class="grid min-w-full"
-                    style="grid-template-columns: max-content max-content 1fr 80px">
+            <div
+                data-testid="client_table"
+                class="grid min-w-full"
+                style="grid-template-columns: max-content max-content 1fr 80px">
                 <ClientTableHeading></ClientTableHeading>
                 <div v-if="clients.length === 0" class="col-span-3 py-24 text-center">
                     <UserCircleIcon class="w-8 text-icon-default inline pb-2"></UserCircleIcon>

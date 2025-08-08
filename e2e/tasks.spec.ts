@@ -69,18 +69,12 @@ test('test that creating and deleting a new tag in a new project works', async (
 
     const moreButton = page.locator("[aria-label='Actions for Project " + newProjectName + "']");
     moreButton.click();
-    const deleteButton = page.locator("[aria-label='Delete Project " + newProjectName + "']");
-
+    // Deletion no longer supported: archive instead.
+    const archiveButton = page.locator("[aria-label='Archive Project " + newProjectName + "']");
     await Promise.all([
-        deleteButton.click(),
-        page.waitForResponse(
-            async (response) =>
-                response.url().includes('/projects') &&
-                response.request().method() === 'DELETE' &&
-                response.status() === 204
-        ),
+        archiveButton.click(),
+        expect(page.getByTestId('project_table')).not.toContainText(newProjectName),
     ]);
-    await expect(page.getByTestId('project_table')).not.toContainText(newProjectName);
 });
 
 test('test that archiving and unarchiving tasks works', async ({ page }) => {

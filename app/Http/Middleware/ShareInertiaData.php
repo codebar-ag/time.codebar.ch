@@ -79,10 +79,8 @@ class ShareInertiaData
                             'currency' => $user->currentTeam->currency,
                             // Sidebar counts respecting visibility (projects assigned to the user)
                             'counts' => (function () use ($user) {
+                                /** @var Organization $organization */
                                 $organization = $user->currentTeam;
-                                if ($organization === null) {
-                                    return [];
-                                }
                                 /** @var AppPermissionStore $permissionStore */
                                 $permissionStore = app(AppPermissionStore::class);
                                 $canViewAllProjects = $permissionStore->has($organization, 'projects:view:all');

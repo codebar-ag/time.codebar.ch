@@ -9,7 +9,9 @@ async function goToProjectsOverview(page: Page) {
 }
 
 // Create new project via modal
-test.skip('test that creating and deleting a new project via the modal works (disabled - deletion no longer supported)', async ({ page }) => {
+test.skip('test that creating and deleting a new project via the modal works (disabled - deletion no longer supported)', async ({
+    page,
+}) => {
     const newProjectName = 'New Project ' + Math.floor(1 + Math.random() * 10000);
     await goToProjectsOverview(page);
     await page.getByRole('button', { name: 'Create Project' }).click();
@@ -102,12 +104,12 @@ test('test that updating billable rate works with existing time entries', async 
                 (await response.json()).data.billable_rate === newBillableRate * 100
         ),
     ]);
-    await expect(
-        page
-            .getByRole('row')
-            .first()
-            .getByText(formatCentsWithOrganizationDefaults(newBillableRate * 100))
-    ).toBeVisible();
+
+    // UI no longer shows billable rate in the overview by default.
+    // Reopen the edit modal and verify the value was persisted.
+    await page.getByRole('row').first().getByRole('button').click();
+    await page.getByRole('menuitem').getByText('Edit').first().click();
+    await expect(page.getByPlaceholder('Billable Rate')).toHaveValue(newBillableRate.toString());
 });
 
 // Create new project with new Client

@@ -7,7 +7,9 @@ defineProps<{
 
 <template>
     <TableHeading>
-        <div class="py-1.5 pr-3 text-left font-semibold text-text-primary pl-4 sm:pl-6 lg:pl-8">Name</div>
+        <div class="py-1.5 pr-3 text-left font-semibold text-text-primary pl-4 sm:pl-6 lg:pl-8">
+            Name
+        </div>
         <div class="px-3 py-1.5 text-left font-semibold text-text-primary">Client</div>
         <div class="px-3 py-1.5 text-left font-semibold text-text-primary">Total Time</div>
         <div class="px-3 py-1.5 text-left font-semibold text-text-primary">Progress</div>

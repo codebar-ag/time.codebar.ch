@@ -169,7 +169,9 @@ const page = usePage<{
                                 v-if="canViewProjects()"
                                 title="Projects"
                                 :icon="FolderIcon"
-                                :count="(page.props as any).auth.user.current_team?.counts?.projects"
+                                :count="
+                                    (page.props as any).auth.user.current_team?.counts?.projects
+                                "
                                 :href="route('projects')"
                                 :current="route().current('projects')"></NavigationSidebarItem>
                             <NavigationSidebarItem
