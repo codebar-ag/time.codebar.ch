@@ -211,11 +211,10 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
             ->has('data')
             ->has('links')
             ->has('meta')
-            ->where('data.0.billable_rate', 112)
-            ->where('data.1.billable_rate', 112)
-            ->where('data.2.billable_rate', 113)
-            ->where('data.3.billable_rate', 113)
         );
+        $billableRates = $response->json('data.*.billable_rate');
+        sort($billableRates);
+        $this->assertSame([112, 112, 113, 113], $billableRates);
     }
 
     public function test_show_endpoint_fails_if_user_is_not_part_of_project_organization(): void

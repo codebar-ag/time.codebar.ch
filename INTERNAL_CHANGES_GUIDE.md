@@ -242,6 +242,7 @@ Numbers are: [insertions] [deletions] [path]
 
 ### API Behavior Changes (Upgrade Notes)
 - Clients API: `GET /api/v1/organizations/{org}/clients` now returns clients ordered by `name` ascending (was `created_at` desc). If you rely on ordering, update your consumers accordingly.
+- Projects API: `GET /api/v1/organizations/{org}/projects` now returns projects ordered by `name` ascending (was `created_at`-based ordering in some flows). If you relied on creation-time ordering, sort client-side or use a dedicated query param in future versions.
 - Clients API: `DELETE /api/v1/organizations/{org}/clients/{client}` is disabled. It now returns `200` with `{ message: "Client deletion disabled" }` and does not delete data.
 - Projects API: `DELETE /api/v1/organizations/{org}/projects/{project}` is disabled. It now returns `200` with `{ message: "Project deletion disabled" }` and does not delete data.
 
