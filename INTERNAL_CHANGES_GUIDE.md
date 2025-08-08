@@ -4,11 +4,11 @@ Authoritative, replayable guide for changes between the base commit and the curr
 
 ### Scope
 - **Base commit (from):** f68f05d1aae30647f694c941597edc373561d50d
-- **Current commit (to):** 324a12ffada544ce08be361c76534e75ce781a25
+- **Current commit (to):** 46e97e82481d57d67ea9a6a512cac974ea6598c7
 - **Current branch:** feature-relaunch
-- **Uncommitted changes at capture time:** none
+- **Uncommitted changes at capture time:** reflected in patch
 - **Patch file (binary-safe):** `INTERNAL_CHANGES_GUIDE.patch`
-- **Patch SHA256:** f780ccdef9900eee8db7dade5252efb5ff911cd76bf3d3c0fa9389a328642592
+- **Patch SHA256:** 4f286c4ee00a4202202d16d455f730d0707d3bbc7fa96ef6db870cbbce34c9cf
 
 ### Replay: Quick Start
 1) Ensure a clean working tree.
@@ -22,7 +22,7 @@ git checkout f68f05d1aae30647f694c941597edc373561d50d
 3) Verify patch integrity.
    ```bash
 shasum -a 256 INTERNAL_CHANGES_GUIDE.patch
-# must equal: f780ccdef9900eee8db7dade5252efb5ff911cd76bf3d3c0fa9389a328642592
+# must equal: 4f286c4ee00a4202202d16d455f730d0707d3bbc7fa96ef6db870cbbce34c9cf
    ```
 4) Apply changes.
    ```bash
@@ -102,13 +102,14 @@ M       .github/workflows/playwright.yml
 D       CODE_OF_CONDUCT.md
 D       CONTRIBUTING.md
 A       INTERNAL_CHANGES_GUIDE.md
+A       INTERNAL_CHANGES_GUIDE.patch
 D       LICENSE.md
 D       SECURITY.md
+M       app/Actions/Jetstream/AddOrganizationMember.php
+M       app/Actions/Jetstream/UpdateOrganization.php
 M       app/Http/Controllers/Api/V1/ClientController.php
 M       app/Http/Controllers/Api/V1/ProjectController.php
 M       app/Http/Middleware/ShareInertiaData.php
-M       app/Actions/Jetstream/AddOrganizationMember.php
-M       app/Actions/Jetstream/UpdateOrganization.php
 M       composer.json
 M       composer.lock
 M       config/database.php
@@ -133,6 +134,8 @@ D       docker/prod/deployment/supervisord.scheduler.conf
 D       docker/prod/deployment/supervisord.worker.conf
 M       e2e/clients.spec.ts
 M       e2e/projects.spec.ts
+M       e2e/tasks.spec.ts
+M       e2e/timetracker.spec.ts
 M       package-lock.json
 M       resources/js/Components/Common/Client/ClientMoreOptionsDropdown.vue
 M       resources/js/Components/Common/Client/ClientTable.vue
@@ -155,6 +158,8 @@ M       resources/js/Pages/Projects.vue
 M       resources/js/utils/useClients.ts
 M       resources/js/utils/useProjects.ts
 M       resources/js/utils/useReporting.ts
+M       tests/Unit/Endpoint/Api/V1/ClientEndpointTest.php
+M       tests/Unit/Endpoint/Api/V1/ProjectEndpointTest.php
 M       vite-module-loader.js
 ```
 
@@ -172,17 +177,18 @@ Numbers are: [insertions] [deletions] [path]
 1	1	.github/workflows/npm-typecheck.yml
 1	1	.github/workflows/phpstan.yml
 1	1	.github/workflows/phpunit.yml
-1	1	.github/workflows/playwright.yml
+7	3	.github/workflows/playwright.yml
 0	42	CODE_OF_CONDUCT.md
 0	81	CONTRIBUTING.md
-596	0	INTERNAL_CHANGES_GUIDE.md
+305	0	INTERNAL_CHANGES_GUIDE.md
+12072	0	INTERNAL_CHANGES_GUIDE.patch
 0	651	LICENSE.md
 0	5	SECURITY.md
+1	1	app/Actions/Jetstream/AddOrganizationMember.php
+1	1	app/Actions/Jetstream/UpdateOrganization.php
 3	8	app/Http/Controllers/Api/V1/ClientController.php
 4	20	app/Http/Controllers/Api/V1/ProjectController.php
-44	3	app/Http/Middleware/ShareInertiaData.php
-1	0	app/Actions/Jetstream/AddOrganizationMember.php
-1	0	app/Actions/Jetstream/UpdateOrganization.php
+42	3	app/Http/Middleware/ShareInertiaData.php
 4	1	composer.json
 398	337	composer.lock
 6	1	config/database.php
@@ -205,30 +211,34 @@ Numbers are: [insertions] [deletions] [path]
 0	14	docker/prod/deployment/supervisord.reverb.conf
 0	26	docker/prod/deployment/supervisord.scheduler.conf
 0	13	docker/prod/deployment/supervisord.worker.conf
-5	11	e2e/clients.spec.ts
-5	11	e2e/projects.spec.ts
+7	11	e2e/clients.spec.ts
+13	17	e2e/projects.spec.ts
+4	10	e2e/tasks.spec.ts
+2	2	e2e/timetracker.spec.ts
 923	1310	package-lock.json
-1	9	resources/js/Components/Common/Client/ClientMoreOptionsDropdown.vue
-10	6	resources/js/Components/Common/Client/ClientTable.vue
-3	6	resources/js/Components/Common/Client/ClientTableHeading.vue
-9	17	resources/js/Components/Common/Client/ClientTableRow.vue
+3	11	resources/js/Components/Common/Client/ClientMoreOptionsDropdown.vue
+7	3	resources/js/Components/Common/Client/ClientTable.vue
+3	4	resources/js/Components/Common/Client/ClientTableHeading.vue
+9	18	resources/js/Components/Common/Client/ClientTableRow.vue
 3	3	resources/js/Components/Common/Project/ProjectDropdown.vue
 2	2	resources/js/Components/Common/Project/ProjectEditModal.vue
-1	9	resources/js/Components/Common/Project/ProjectMoreOptionsDropdown.vue
+3	11	resources/js/Components/Common/Project/ProjectMoreOptionsDropdown.vue
 15	3	resources/js/Components/Common/Project/ProjectTable.vue
-2	8	resources/js/Components/Common/Project/ProjectTableHeading.vue
-6	17	resources/js/Components/Common/Project/ProjectTableRow.vue
-2	1	resources/js/Components/Common/Reporting/ReportingOverview.vue
+2	6	resources/js/Components/Common/Project/ProjectTableHeading.vue
+7	19	resources/js/Components/Common/Project/ProjectTableRow.vue
+3	1	resources/js/Components/Common/Reporting/ReportingOverview.vue
 2	1	resources/js/Components/Dashboard/RecentlyTrackedTasksCardEntry.vue
 3	1	resources/js/Components/NavigationSidebarItem.vue
-5	1	resources/js/Components/NavigationSidebarLink.vue
-2	0	resources/js/Layouts/AppLayout.vue
-29	4	resources/js/Pages/Clients.vue
+7	1	resources/js/Components/NavigationSidebarLink.vue
+4	0	resources/js/Layouts/AppLayout.vue
+32	4	resources/js/Pages/Clients.vue
 2	2	resources/js/Pages/ProjectShow.vue
 38	7	resources/js/Pages/Projects.vue
 2	18	resources/js/utils/useClients.ts
 1	18	resources/js/utils/useProjects.ts
 3	2	resources/js/utils/useReporting.ts
+12	9	tests/Unit/Endpoint/Api/V1/ClientEndpointTest.php
+14	15	tests/Unit/Endpoint/Api/V1/ProjectEndpointTest.php
 20	5	vite-module-loader.js
 ```
 
@@ -288,7 +298,7 @@ npx playwright test
 
 ### Commit Context
 ```text
-324a12f (HEAD -> feature-relaunch, origin/feature-relaunch) wip
+46e97e8 (HEAD -> feature-relaunch) latest changes including API adjustments and CI tweaks
 ```
 
 ### Notes and Caveats
