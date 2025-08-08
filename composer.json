@@ -5,7 +5,7 @@
     "keywords": [],
     "license": "AGPL-3.0-or-later",
     "require": {
-        "php": "8.3.*",
+        "php": "8.4.*",
         "ext-zip": "*",
         "brick/money": "^0.10.0",
         "datomatic/laravel-enum-helper": "^2.0.0",
@@ -127,6 +127,9 @@
         "optimize-autoloader": true,
         "preferred-install": "dist",
         "sort-packages": true,
+        "platform": {
+            "php": "8.4.0"
+        },
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true,

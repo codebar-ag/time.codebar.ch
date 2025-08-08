@@ -57,15 +57,7 @@ const props = defineProps<{
                 <ArchiveBoxIcon class="w-5 text-icon-active" />
                 <span>{{ project.is_archived ? 'Unarchive' : 'Archive' }}</span>
             </DropdownMenuItem>
-            <DropdownMenuItem
-                v-if="canDeleteProjects()"
-                :aria-label="'Delete Project ' + props.project.name"
-                data-testid="project_delete"
-                class="flex items-center space-x-3 cursor-pointer text-destructive focus:text-destructive"
-                @click.prevent="emit('delete')">
-                <TrashIcon class="w-5" />
-                <span>Delete</span>
-            </DropdownMenuItem>
+            <!-- Delete disabled intentionally -->
         </DropdownMenuContent>
     </DropdownMenu>
 </template>

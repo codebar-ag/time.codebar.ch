@@ -15,11 +15,20 @@ async function getExportedModulesArrayAttributes(modulesPath, attribute) {
 
     const moduleStatusesPath = path.join(__dirname, 'modules_statuses.json');
 
+    let moduleStatuses = {};
     try {
-        // Read module_statuses.json
         const moduleStatusesContent = await fs.readFile(moduleStatusesPath, 'utf-8');
-        const moduleStatuses = JSON.parse(moduleStatusesContent);
+        moduleStatuses = JSON.parse(moduleStatusesContent);
+    } catch (error) {
+        // If the statuses file is missing, assume no modules are enabled and return empty result silently
+        if (error && error.code !== 'ENOENT') {
+            // Log non-ENOENT errors as warnings
+            console.warn(`Warning while reading module statuses: ${error}`);
+        }
+        return result;
+    }
 
+    try {
         // Read module directories
         const moduleDirectories = await fs.readdir(modulesPath);
 
@@ -32,7 +41,12 @@ async function getExportedModulesArrayAttributes(modulesPath, attribute) {
             // Check if the module is enabled (status is true)
             if (moduleStatuses[moduleDir] === true) {
                 const viteConfigPath = path.join(modulesPath, moduleDir, 'vite.config.js');
-                const stat = await fs.stat(viteConfigPath);
+                let stat;
+                try {
+                    stat = await fs.stat(viteConfigPath);
+                } catch {
+                    continue;
+                }
 
                 if (stat.isFile()) {
                     // Import the module-specific Vite configuration
@@ -44,8 +58,9 @@ async function getExportedModulesArrayAttributes(modulesPath, attribute) {
                 }
             }
         }
-    } catch (error) {
-        console.error(`Error reading module statuses or module configurations: ${error}`);
+    } catch {
+        // If modules directory doesn't exist, return empty result silently
+        return result;
     }
 
     return result;

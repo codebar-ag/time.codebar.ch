@@ -13,14 +13,12 @@ use App\Http\Resources\V1\Project\ProjectCollection;
 use App\Http\Resources\V1\Project\ProjectResource;
 use App\Models\Organization;
 use App\Models\Project;
-use App\Models\ProjectMember;
 use App\Models\TimeEntry;
 use App\Service\BillableRateService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -48,7 +46,8 @@ class ProjectController extends Controller
         $user = $this->user();
 
         $projectsQuery = Project::query()
-            ->whereBelongsTo($organization, 'organization');
+            ->whereBelongsTo($organization, 'organization')
+            ->orderBy('name');
 
         if (! $canViewAllProjects) {
             $projectsQuery->visibleByEmployee($user);
@@ -167,22 +166,7 @@ class ProjectController extends Controller
     {
         $this->checkPermission($organization, 'projects:delete', $project);
 
-        if ($project->tasks()->exists()) {
-            throw new EntityStillInUseApiException('project', 'task');
-        }
-        if ($project->timeEntries()->exists()) {
-            throw new EntityStillInUseApiException('project', 'time_entry');
-        }
-
-        DB::transaction(function () use (&$project): void {
-            $project->members->each(function (ProjectMember $member): void {
-                $member->delete();
-            });
-
-            $project->delete();
-        });
-
-        return response()
-            ->json(null, 204);
+        // Deletion disabled: return early to keep data intact
+        return response()->json(['message' => 'Project deletion disabled'], 200);
     }
 }

@@ -29,14 +29,14 @@ import ProjectEditModal from '@/Components/Common/Project/ProjectEditModal.vue';
 import { Badge } from '@/packages/ui/src';
 import { formatCents } from '../packages/ui/src/utils/money';
 import { getOrganizationCurrencyString } from '../utils/money';
-import type { Organization } from '@/packages/api/src';
+import type { Organization, Project } from '@/packages/api/src';
 
 const { projects } = storeToRefs(useProjectsStore());
 
 const organization = inject<ComputedRef<Organization>>('organization');
 
 const project = computed(() => {
-    return projects.value.find((project) => project.id === route().params.project) ?? null;
+    return projects.value.find((project: Project) => project.id === route().params.project) ?? null;
 });
 const createTask = ref(false);
 const createProjectMember = ref(false);

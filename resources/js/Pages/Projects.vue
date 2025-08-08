@@ -2,6 +2,7 @@
 import MainContainer from '@/packages/ui/src/MainContainer.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { FolderIcon, PlusIcon } from '@heroicons/vue/16/solid';
+import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import ProjectTable from '@/Components/Common/Project/ProjectTable.vue';
 import { computed, onMounted, ref } from 'vue';
@@ -22,6 +23,7 @@ import { isAllowedToPerformPremiumAction } from '@/utils/billing';
 onMounted(() => {
     useProjectsStore().fetchProjects();
     useOrganizationStore().fetchOrganization();
+    useClientsStore().fetchClients();
 });
 const { clients } = storeToRefs(useClientsStore());
 const showCreateProjectModal = ref(false);
@@ -31,14 +33,30 @@ const { organization } = storeToRefs(useOrganizationStore());
 const activeTab = ref<'active' | 'archived'>('active');
 
 const { projects } = storeToRefs(useProjectsStore());
+const searchQuery = ref('');
 
 const shownProjects = computed(() => {
-    return projects.value.filter((project) => {
+    let filteredProjects = projects.value.filter((project: Project) => {
         if (activeTab.value === 'active') {
             return !project.is_archived;
         }
         return project.is_archived;
     });
+
+    if (searchQuery.value.trim()) {
+        const query = searchQuery.value.toLowerCase().trim();
+        const clientsMap = new Map(clients.value.map((c: Client) => [c.id, c]));
+
+        filteredProjects = filteredProjects.filter((project: Project) => {
+            const projectNameMatch = project.name.toLowerCase().includes(query);
+            const clientNameMatch = project.client_id
+                ? (clientsMap.get(project.client_id)?.name.toLowerCase().includes(query) ?? false)
+                : false;
+            return projectNameMatch || clientNameMatch;
+        });
+    }
+
+    return filteredProjects;
 });
 async function createProject(project: CreateProjectBody): Promise<Project | undefined> {
     return await useProjectsStore().createProject(project);
@@ -65,12 +83,25 @@ const showBillableRate = computed(() => {
                     <TabBarItem value="archived">Archived</TabBarItem>
                 </TabBar>
             </div>
-            <SecondaryButton
-                v-if="canCreateProjects()"
-                :icon="PlusIcon"
-                @click="showCreateProjectModal = true"
-                >Create Project
-            </SecondaryButton>
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
+                    </div>
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Search projects or clients..."
+                        class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm"
+                    />
+                </div>
+                <SecondaryButton
+                    v-if="canCreateProjects()"
+                    :icon="PlusIcon"
+                    @click="showCreateProjectModal = true"
+                    >Create Project
+                </SecondaryButton>
+            </div>
             <ProjectCreateModal
                 v-model:show="showCreateProjectModal"
                 :create-project

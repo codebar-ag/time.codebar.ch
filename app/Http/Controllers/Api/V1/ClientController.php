@@ -41,7 +41,7 @@ class ClientController extends Controller
 
         $clientsQuery = Client::query()
             ->whereBelongsTo($organization, 'organization')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('name');
 
         $filterArchived = $request->getFilterArchived();
         if ($filterArchived === 'true') {
@@ -105,12 +105,7 @@ class ClientController extends Controller
     {
         $this->checkPermission($organization, 'clients:delete', $client);
 
-        if ($client->projects()->exists()) {
-            throw new EntityStillInUseApiException('client', 'project');
-        }
-
-        $client->delete();
-
-        return response()->json(null, 204);
+        // Deletion disabled: return early to keep data intact
+        return response()->json(['message' => 'Client deletion disabled'], 200);
     }
 }

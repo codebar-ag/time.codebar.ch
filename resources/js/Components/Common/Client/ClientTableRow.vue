@@ -15,12 +15,10 @@ const props = defineProps<{
     client: Client;
 }>();
 
-function deleteClient() {
-    useClientsStore().deleteClient(props.client.id);
-}
+// Delete disabled intentionally
 
 const projectCount = computed(() => {
-    return projects.value.filter((projects) => projects.client_id === props.client.id).length;
+    return projects.value.filter((project) => project.client_id === props.client.id).length;
 });
 
 function archiveClient() {
@@ -36,28 +34,22 @@ const showEditModal = ref(false);
 <template>
     <TableRow>
         <ClientEditModal v-model:show="showEditModal" :client="client"></ClientEditModal>
-        <div
-            class="whitespace-nowrap flex items-center space-x-5 3xl:pl-12 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12">
-            <span>
-                {{ client.name }}
-            </span>
+        <div class="whitespace-nowrap py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
+            <span>{{ client.name }}</span>
         </div>
-        <div
-            class="whitespace-nowrap flex items-center space-x-5 3xl:pl-12 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8 3xl:pl-12">
+        <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
             <span class="text-text-secondary"> {{ projectCount }} Projects </span>
         </div>
-        <div
-            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary flex space-x-1 items-center font-medium">
-            <CheckCircleIcon class="w-5"></CheckCircleIcon>
-            <span>Active</span>
-        </div>
+        <!-- spacer for right-aligned actions column -->
+        <div></div>
+
         <div
             class="relative whitespace-nowrap flex items-center pl-3 text-right text-sm font-medium sm:pr-0 pr-4 sm:pr-6 lg:pr-8 3xl:pr-12">
             <ClientMoreOptionsDropdown
                 :client="client"
                 @edit="showEditModal = true"
                 @archive="archiveClient"
-                @delete="deleteClient"></ClientMoreOptionsDropdown>
+            ></ClientMoreOptionsDropdown>
         </div>
     </TableRow>
 </template>

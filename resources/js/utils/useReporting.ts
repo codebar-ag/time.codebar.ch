@@ -9,6 +9,7 @@ import type {
 import { getCurrentOrganizationId, getCurrentRole, getCurrentUser } from '@/utils/useUser';
 import { useNotificationsStore } from '@/utils/notification';
 import { useProjectsStore } from '@/utils/useProjects';
+import type { Project, Client } from '@/packages/api/src';
 import { useMembersStore } from '@/utils/useMembers';
 import { useTasksStore } from '@/utils/useTasks';
 import { useClientsStore } from '@/utils/useClients';
@@ -86,7 +87,7 @@ export const useReportingStore = defineStore('reporting', () => {
         if (type === 'project') {
             const projectsStore = useProjectsStore();
             const { projects } = storeToRefs(projectsStore);
-            return projects.value.find((project) => project.id === key)?.name;
+            return projects.value.find((project: Project) => project.id === key)?.name;
         }
         if (type === 'user') {
             if (getCurrentRole() === 'employee') {
@@ -104,7 +105,7 @@ export const useReportingStore = defineStore('reporting', () => {
         if (type === 'client') {
             const clientsStore = useClientsStore();
             const { clients } = storeToRefs(clientsStore);
-            return clients.value.find((client) => client.id === key)?.name;
+            return clients.value.find((client: Client) => client.id === key)?.name;
         }
         if (type === 'billable') {
             if (key === '0') {

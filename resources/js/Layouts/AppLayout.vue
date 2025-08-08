@@ -169,12 +169,14 @@ const page = usePage<{
                                 v-if="canViewProjects()"
                                 title="Projects"
                                 :icon="FolderIcon"
+                                :count="(page.props as any).auth.user.current_team?.counts?.projects"
                                 :href="route('projects')"
                                 :current="route().current('projects')"></NavigationSidebarItem>
                             <NavigationSidebarItem
                                 v-if="canViewClients()"
                                 title="Clients"
                                 :icon="UserCircleIcon"
+                                :count="(page.props as any).auth.user.current_team?.counts?.clients"
                                 :current="route().current('clients')"
                                 :href="route('clients')"></NavigationSidebarItem>
                             <NavigationSidebarItem

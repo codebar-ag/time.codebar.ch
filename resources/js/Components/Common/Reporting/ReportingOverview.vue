@@ -45,6 +45,7 @@ import { useNotificationsStore } from '@/utils/notification';
 import type { ExportFormat } from '@/types/reporting';
 import { getRandomColorWithSeed } from '@/packages/ui/src/utils/color';
 import { useProjectsStore } from '@/utils/useProjects';
+import type { Project } from '@/packages/api/src';
 
 // TimeEntryRoundingType is now defined in ReportingRoundingControls component
 type TimeEntryRoundingType = 'up' | 'down' | 'nearest';
@@ -220,7 +221,7 @@ const groupedPieChartData = computed(() => {
                 color = '#CCCCCC';
             } else if (aggregatedTableTimeEntries.value?.grouped_type === 'project') {
                 color =
-                    projects.value?.find((project) => project.id === entry.key)?.color ?? '#CCCCCC';
+                    projects.value?.find((project: Project) => project.id === entry.key)?.color ?? '#CCCCCC';
             }
             return {
                 value: entry.seconds,

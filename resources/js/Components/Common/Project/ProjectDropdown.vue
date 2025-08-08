@@ -32,7 +32,7 @@ const emit = defineEmits(['update:modelValue', 'changed']);
 const { projects } = storeToRefs(projectsStore);
 const projectDropdownTrigger = ref<HTMLElement | null>(null);
 const shownProjects = computed(() => {
-    return projects.value.filter((project) => {
+    return projects.value.filter((project: Project) => {
         return project.name.toLowerCase().includes(searchValue.value?.toLowerCase()?.trim() || '');
     });
 });
@@ -78,14 +78,14 @@ watch(open, (isOpen) => {
             searchInput.value?.$el?.focus();
         });
 
-        projects.value.sort((iteratingProject) => {
+        projects.value.sort((iteratingProject: Project) => {
             return model.value === iteratingProject.id ? -1 : 1;
         });
     }
 });
 
 const currentProject = computed(() => {
-    return projects.value.find((project) => project.id === model.value);
+    return projects.value.find((project: Project) => project.id === model.value);
 });
 
 function isProjectSelected(project: Project) {

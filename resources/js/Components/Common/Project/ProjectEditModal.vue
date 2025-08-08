@@ -3,7 +3,7 @@ import TextInput from '@/packages/ui/src/Input/TextInput.vue';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import DialogModal from '@/packages/ui/src/DialogModal.vue';
 import { computed, ref } from 'vue';
-import type { CreateClientBody, CreateProjectBody, Project } from '@/packages/api/src';
+import type { CreateClientBody, CreateProjectBody, Project, Client } from '@/packages/api/src';
 import PrimaryButton from '@/packages/ui/src/Buttons/PrimaryButton.vue';
 import { useProjectsStore } from '@/utils/useProjects';
 import { useFocus } from '@vueuse/core';
@@ -60,7 +60,7 @@ useFocus(projectNameInput, { initialValue: true });
 
 const currentClientName = computed(() => {
     if (project.value.client_id) {
-        return clients.value.find((client) => client.id === project.value.client_id)?.name;
+        return clients.value.find((client: Client) => client.id === project.value.client_id)?.name;
     }
     return 'No Client';
 });

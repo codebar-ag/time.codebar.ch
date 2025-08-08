@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import { UserCircleIcon } from '@heroicons/vue/24/solid';
 import { PlusIcon } from '@heroicons/vue/16/solid';
@@ -9,9 +10,12 @@ import ClientCreateModal from '@/Components/Common/Client/ClientCreateModal.vue'
 import ClientTableHeading from '@/Components/Common/Client/ClientTableHeading.vue';
 import { canCreateClients } from '@/utils/permissions';
 
-defineProps<{
+const props = defineProps<{
     clients: Client[];
 }>();
+const sortedClients = computed(() => {
+    return [...props.clients].sort((a, b) => a.name.localeCompare(b.name));
+});
 const createClient = ref(false);
 </script>
 
@@ -19,10 +23,10 @@ const createClient = ref(false);
     <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
     <div class="flow-root max-w-[100vw] overflow-x-auto">
         <div class="inline-block min-w-full align-middle">
-            <div
-                data-testid="client_table"
-                class="grid min-w-full"
-                style="grid-template-columns: 1fr 150px 200px 80px">
+                <div
+                    data-testid="client_table"
+                    class="grid min-w-full"
+                    style="grid-template-columns: max-content max-content 1fr 80px">
                 <ClientTableHeading></ClientTableHeading>
                 <div v-if="clients.length === 0" class="col-span-3 py-24 text-center">
                     <UserCircleIcon class="w-8 text-icon-default inline pb-2"></UserCircleIcon>
@@ -35,7 +39,7 @@ const createClient = ref(false);
                         >Create your First Client
                     </SecondaryButton>
                 </div>
-                <template v-for="client in clients" :key="client.id">
+                <template v-for="client in sortedClients" :key="client.id">
                     <ClientTableRow :client="client"></ClientTableRow>
                 </template>
             </div>

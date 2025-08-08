@@ -6,6 +6,7 @@ defineProps<{
     icon?: Component;
     current?: boolean;
     href: string;
+    count?: number | string;
 }>();
 </script>
 
@@ -26,7 +27,10 @@ defineProps<{
                     'transition h-4 w-4 shrink-0',
                 ]"
                 aria-hidden="true" />
-            {{ title }}
+            <span class="flex-1 truncate">{{ title }}</span>
+            <span v-if="typeof count !== 'undefined'" class="ml-2 px-1.5 rounded bg-quaternary text-text-tertiary text-[10px] leading-5 min-w-[1.25rem] text-center">
+                {{ count }}
+            </span>
         </div>
     </Link>
 </template>

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\Client;
 use App\Models\Organization;
+use App\Models\Project;
 use App\Models\User;
-use App\Service\PermissionStore;
+use App\Service\PermissionStore as AppPermissionStore;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -24,8 +26,8 @@ class ShareInertiaData
      */
     public function handle(Request $request, Closure $next): Response
     {
-        /** @var PermissionStore $permissions */
-        $permissions = app(PermissionStore::class);
+        /** @var AppPermissionStore $permissions */
+        $permissions = app(AppPermissionStore::class);
         Inertia::share([
             'jetstream' => function () use ($request) {
                 /** @var User|null $user */
@@ -75,6 +77,45 @@ class ShareInertiaData
                             'name' => $user->currentTeam->name,
                             'personal_team' => $user->currentTeam->personal_team,
                             'currency' => $user->currentTeam->currency,
+                            // Sidebar counts respecting visibility (projects assigned to the user)
+                            'counts' => (function () use ($user) {
+                                $organization = $user->currentTeam;
+                                if ($organization === null) {
+                                    return [];
+                                }
+                                /** @var AppPermissionStore $permissionStore */
+                                $permissionStore = app(AppPermissionStore::class);
+                                $canViewAllProjects = $permissionStore->has($organization, 'projects:view:all');
+
+                                // Projects count (active only), restricted to assigned projects if not allowed to view all
+                                $projectsQuery = Project::query()
+                                    ->whereBelongsTo($organization, 'organization')
+                                    ->whereNull('archived_at');
+                                if (! $canViewAllProjects) {
+                                    $projectsQuery->visibleByEmployee($user);
+                                }
+                                $projectsCount = (clone $projectsQuery)->count();
+
+                                // Clients count: distinct clients with at least one visible active project
+                                $clientsCount = Client::query()
+                                    ->whereBelongsTo($organization, 'organization')
+                                    ->whereNull('archived_at')
+                                    ->whereHas('projects', function ($query) use ($organization, $user, $canViewAllProjects): void {
+                                        /** @var \Illuminate\Database\Eloquent\Builder<Project> $query */
+                                        $query->whereBelongsTo($organization, 'organization')
+                                            ->whereNull('archived_at');
+                                        if (! $canViewAllProjects) {
+                                            $query->visibleByEmployee($user);
+                                        }
+                                    })
+                                    ->distinct('clients.id')
+                                    ->count('clients.id');
+
+                                return [
+                                    'projects' => $projectsCount,
+                                    'clients' => $clientsCount,
+                                ];
+                            })(),
                         ] : null,
                     ], array_filter([
                         'all_teams' => $user->organizations->map(function (Organization $organization): array {

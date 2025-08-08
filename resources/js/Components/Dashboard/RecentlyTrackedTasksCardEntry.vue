@@ -2,6 +2,7 @@
 import ProjectBadge from '@/packages/ui/src/Project/ProjectBadge.vue';
 import TimeTrackerStartStop from '@/packages/ui/src/TimeTrackerStartStop.vue';
 import { useProjectsStore } from '@/utils/useProjects';
+import type { Project } from '@/packages/api/src';
 import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 import { useCurrentTimeEntryStore } from '@/utils/useCurrentTimeEntry';
@@ -17,7 +18,7 @@ const props = defineProps<{
 const { projects } = storeToRefs(useProjectsStore());
 
 const project = computed(() => {
-    return projects.value.find((project) => project.id === props.timeEntry.project_id);
+    return projects.value.find((project: Project) => project.id === props.timeEntry.project_id);
 });
 
 const { tasks } = storeToRefs(useTasksStore());
