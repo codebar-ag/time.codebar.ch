@@ -29,11 +29,12 @@
     "license": "AGPL-3.0",
     "dependencies": {
         "@zodios/core": "^10.9.6",
+        "axios": "^1.12.2",
         "typescript": "^5.5.4",
         "zod": "^3.23.8"
     },
     "devDependencies": {
-        "vite": "^5.4.2",
+        "vite": "^5.4.20",
         "vite-plugin-dts": "^4.0.3"
     }
 }
