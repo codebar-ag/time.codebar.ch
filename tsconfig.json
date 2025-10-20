@@ -4,15 +4,17 @@
     "vendor/**/*"
   ],
   "compilerOptions": {
+    "skipLibCheck": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "resources/js/types"
+    ],
     "paths": {
-      "@/*": ["./resources/js/*"],
+      "@/*": [
+        "./resources/js/*"
+      ]
     }
   },
-  "skipLibCheck": true,
-  "typeRoots": [
-    "./node_modules/@types",
-    "resources/js/types",
-  ],
   "include": [
     "resources/js/**/*.ts",
     "resources/js/**/*.d.ts",
@@ -20,6 +22,6 @@
     "resources/js/ziggy.d.ts",
     "extensions/Invoicing/resources/js/**/*.ts",
     "extensions/Invoicing/resources/js/**/*.d.ts",
-    "extensions/Invoicing/resources/js/**/*.vue",
+    "extensions/Invoicing/resources/js/**/*.vue"
   ]
 }

@@ -13,6 +13,7 @@ import {
     ChevronRightIcon,
     ChevronDoubleRightIcon,
     ClockIcon,
+    DocumentTextIcon,
 } from '@heroicons/vue/20/solid';
 import DateRangePicker from '@/packages/ui/src/Input/DateRangePicker.vue';
 import BillableIcon from '@/packages/ui/src/Icons/BillableIcon.vue';
@@ -84,6 +85,7 @@ const selectedMembers = ref<string[]>([]);
 const selectedTasks = ref<string[]>([]);
 const selectedClients = ref<string[]>([]);
 const billable = ref<'true' | 'false' | null>(null);
+const invoiced = ref<'true' | 'false' | null>(null);
 const roundingEnabled = ref<boolean>(false);
 const roundingType = ref<TimeEntryRoundingType>('nearest');
 const roundingMinutes = ref<number>(15);
@@ -114,6 +116,7 @@ function getFilterAttributes() {
         client_ids: selectedClients.value.length > 0 ? selectedClients.value : undefined,
         tag_ids: selectedTags.value.length > 0 ? selectedTags.value : undefined,
         billable: billable.value !== null ? billable.value : undefined,
+        invoiced: invoiced.value !== null ? invoiced.value : undefined,
         rounding_type: roundingEnabled.value ? roundingType.value : undefined,
         rounding_minutes: roundingEnabled.value ? roundingMinutes.value : undefined,
     };
@@ -344,6 +347,32 @@ async function downloadExport(format: ExportFormat) {
                                 :icon="BillableIcon"></ReportingFilterBadge>
                         </template>
                     </SelectDropdown>
+                    <SelectDropdown
+                        v-model="invoiced"
+                        :get-key-from-item="(item) => item.value"
+                        :get-name-for-item="(item) => item.label"
+                        :items="[
+                            {
+                                label: 'Both',
+                                value: null,
+                            },
+                            {
+                                label: 'Invoiced',
+                                value: 'true',
+                            },
+                            {
+                                label: 'Not invoiced',
+                                value: 'false',
+                            },
+                        ]"
+                        @changed="updateFilteredTimeEntries">
+                        <template #trigger>
+                            <ReportingFilterBadge
+                                :active="invoiced !== null"
+                                :title="invoiced === 'false' ? 'Not invoiced' : 'Invoiced'"
+                                :icon="DocumentTextIcon"></ReportingFilterBadge>
+                        </template>
+                    </SelectDropdown>
                     <ReportingRoundingControls
                         v-model:enabled="roundingEnabled"
                         v-model:type="roundingType"
@@ -369,6 +398,7 @@ async function downloadExport(format: ExportFormat) {
             :tags="tags"
             :currency="getOrganizationCurrencyString()"
             :clients="clients"
+            class="border-b border-default-background-separator"
             :update-time-entries="
                 (args) =>
                     updateTimeEntries(
@@ -399,6 +429,7 @@ async function downloadExport(format: ExportFormat) {
                     :on-start-stop-click="() => startTimeEntryFromExisting(entry)"
                     :delete-time-entry="() => deleteTimeEntries([entry])"
                     :currency="getOrganizationCurrencyString()"
+                    :duplicate-time-entry="() => createTimeEntry(entry)"
                     :members="members"
                     show-date
                     show-member
