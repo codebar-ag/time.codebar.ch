@@ -108,6 +108,7 @@ function startTimeEntryFromExisting(entry: TimeEntry) {
         tags: [...entry.tags],
     });
 }
+
 function sumDuration(timeEntries: TimeEntry[]) {
     return timeEntries.reduce((acc, entry) => acc + (entry?.duration ?? 0), 0);
 }
@@ -158,6 +159,7 @@ function unselectAllTimeEntries(value: TimeEntriesGroupedByType[]) {
                 :tags="tags"
                 :clients
                 :on-start-stop-click="startTimeEntryFromExisting"
+                :duplicate-time-entry="createTimeEntry"
                 :update-time-entries
                 :update-time-entry
                 :delete-time-entries
@@ -197,7 +199,8 @@ function unselectAllTimeEntries(value: TimeEntriesGroupedByType[]) {
                 :create-tag
                 :update-time-entry
                 :on-start-stop-click="() => startTimeEntryFromExisting(entry)"
-                :delete-time-entry="() => deleteTimeEntries([entry])"
+                :delete-time-entry="async () => await deleteTimeEntries([entry])"
+                :duplicate-time-entry="() => createTimeEntry(entry)"
                 :currency="currency"
                 :time-entry="entry.timeEntries[0]"
                 @selected="selectedTimeEntries.push(entry)"

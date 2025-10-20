@@ -71,7 +71,9 @@ abstract class CsvExport
         $writer->setEscape('');
         $writer->insertOne(static::HEADER);
 
+        /** @param Collection<int, T> $models */
         $this->builder->chunk($this->chunk, function (Collection $models) use ($writer): void {
+            /** @var T $model */
             foreach ($models as $model) {
                 $data = $this->mapRow($model);
                 $row = $this->convertRow($data);

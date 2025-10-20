@@ -119,6 +119,11 @@ class TimeEntryIndexExportRequest extends TimeEntryIndexRequest
                 'string',
                 'in:true,false',
             ],
+            // Filter by invoiced status (invoiced_at not null vs null)
+            'invoiced' => [
+                'string',
+                'in:true,false',
+            ],
             // Limit the number of returned time entries (default: 150)
             'limit' => [
                 'integer',

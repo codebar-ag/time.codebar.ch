@@ -47,6 +47,8 @@ class TimeEntryResource extends BaseResource
             'tags' => $this->resource->tags ?? [],
             /** @var bool $billable Whether time entry is billable */
             'billable' => $this->resource->billable,
+            /** @var string|null $invoiced_at When the time entry was invoiced (ISO 8601 format, UTC timezone, example: 2024-02-26T17:17:17Z) */
+            'invoiced_at' => $this->formatDateTime($this->resource->invoiced_at),
         ];
     }
 }

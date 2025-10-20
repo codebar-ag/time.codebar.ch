@@ -14,10 +14,12 @@ use App\Exceptions\Api\OnlyOwnerCanChangeOwnership;
 use App\Exceptions\Api\OnlyPlaceholdersCanBeMergedIntoAnotherMember;
 use App\Exceptions\Api\OrganizationHasNoSubscriptionButMultipleMembersException;
 use App\Exceptions\Api\OrganizationNeedsAtLeastOneOwner;
+use App\Exceptions\Api\OverlappingTimeEntryApiException;
 use App\Exceptions\Api\PdfRendererIsNotConfiguredException;
 use App\Exceptions\Api\PersonalAccessClientIsNotConfiguredException;
 use App\Exceptions\Api\ThisPlaceholderCanNotBeInvitedUseTheMergeToolInsteadException;
 use App\Exceptions\Api\TimeEntryCanNotBeRestartedApiException;
+use App\Exceptions\Api\TimeEntryInvoicedApiException;
 use App\Exceptions\Api\TimeEntryStillRunningApiException;
 use App\Exceptions\Api\UserIsAlreadyMemberOfOrganizationApiException;
 use App\Exceptions\Api\UserIsAlreadyMemberOfProjectApiException;
@@ -29,6 +31,7 @@ return [
         TimeEntryStillRunningApiException::KEY => 'Time entry is still running',
         UserNotPlaceholderApiException::KEY => 'The given user is not a placeholder',
         TimeEntryCanNotBeRestartedApiException::KEY => 'Time entry is already stopped and can not be restarted',
+        TimeEntryInvoicedApiException::KEY => 'Cannot modify invoiced time entry',
         InactiveUserCanNotBeUsedApiException::KEY => 'Inactive user can not be used',
         UserIsAlreadyMemberOfOrganizationApiException::KEY => 'User is already a member of the organization',
         UserIsAlreadyMemberOfProjectApiException::KEY => 'User is already a member of the project',
@@ -47,6 +50,7 @@ return [
         OnlyPlaceholdersCanBeMergedIntoAnotherMember::KEY => 'Only placeholders can be merged into another member',
         ThisPlaceholderCanNotBeInvitedUseTheMergeToolInsteadException::KEY => 'This placeholder can not be invited use the merge tool instead',
         InvitationForTheEmailAlreadyExistsApiException::KEY => 'The email has already been invited to the organization. Please wait for the user to accept the invitation or resend the invitation email.',
+        OverlappingTimeEntryApiException::KEY => 'Overlapping time entries are not allowed.',
     ],
     'unknown_error_in_admin_panel' => 'An unknown error occurred. Please check the logs.',
 ];
