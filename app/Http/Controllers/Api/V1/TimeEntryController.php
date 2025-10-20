@@ -212,6 +212,7 @@ class TimeEntryController extends Controller
         $filter->addTaskIdsFilter($request->input('task_ids'));
         $filter->addClientIdsFilter($request->input('client_ids'));
         $filter->addBillableFilter($request->input('billable'));
+        $filter->addInvoicedFilter($request->input('invoiced'));
 
         return $filter->get();
     }

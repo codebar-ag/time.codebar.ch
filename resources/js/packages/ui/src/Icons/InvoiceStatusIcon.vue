@@ -32,8 +32,7 @@ const iconSizeClasses = computed(() => {
     <component
         :is="IconComponent"
         :class="[iconColorClasses, iconSizeClasses]"
-        :title="invoiced ? 'Invoiced' : 'Not invoiced'"
-    />
+        :title="invoiced ? 'Invoiced' : 'Not invoiced'" />
 </template>
 
 <style scoped></style>

@@ -228,7 +228,10 @@ export const useTimeEntriesStore = defineStore('timeEntries', () => {
                 if (errorCount > 0) {
                     // Some entries failed to delete (likely invoiced)
                     if (successCount > 0) {
-                        addNotification('error', `${successCount} time entries deleted successfully, ${errorCount} failed (invoiced entries cannot be deleted)`);
+                        addNotification(
+                            'error',
+                            `${successCount} time entries deleted successfully, ${errorCount} failed (invoiced entries cannot be deleted)`
+                        );
                     } else {
                         addNotification('error', 'Cannot delete invoiced time entries');
                     }

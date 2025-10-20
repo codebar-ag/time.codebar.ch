@@ -141,6 +141,36 @@ class TimeEntryFilter
         return $this;
     }
 
+    public function addInvoicedFilter(?string $invoiced): self
+    {
+        if ($invoiced === null) {
+            return $this;
+        }
+        if ($invoiced === 'true') {
+            $this->addInvoiced(true);
+        } elseif ($invoiced === 'false') {
+            $this->addInvoiced(false);
+        } else {
+            Log::warning('Invalid invoiced filter value', ['value' => $invoiced]);
+        }
+
+        return $this;
+    }
+
+    public function addInvoiced(?bool $invoiced): self
+    {
+        if ($invoiced === null) {
+            return $this;
+        }
+        if ($invoiced) {
+            $this->builder->whereNotNull('invoiced_at');
+        } else {
+            $this->builder->whereNull('invoiced_at');
+        }
+
+        return $this;
+    }
+
     /**
      * @param  array<string>|null  $clientIds
      */

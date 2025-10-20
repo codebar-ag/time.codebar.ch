@@ -13,6 +13,11 @@
         "format:check": "prettier --check './**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts,vue}'"
     },
     "devDependencies": {
+        "eslint": "^9.19.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-vue": "^9.30.0",
+        "globals": "^15.12.0",
+        "typescript-eslint": "^8.18.2",
         "@eslint/eslintrc": "^3.2.0",
         "@eslint/js": "^9.19.0",
         "@inertiajs/vue3": "^1.0.0",
@@ -30,6 +35,7 @@
         "openapi-zod-client": "^1.16.2",
         "postcss": "^8.4.47",
         "postcss-nesting": "^12.1.5",
+        "prettier": "^3.3.3",
         "tailwindcss": "^3.4.13",
         "typescript": "^5.7.3",
         "vite": "^6.0.11",
