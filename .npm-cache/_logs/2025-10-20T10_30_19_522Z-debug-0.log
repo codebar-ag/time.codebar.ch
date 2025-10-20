@@ -1,0 +1,121 @@
+0 verbose cli /Users/sebastian/Library/Application Support/Herd/config/nvm/versions/node/v20.13.1/bin/node /Users/sebastian/Library/Application Support/Herd/config/nvm/versions/node/v20.13.1/bin/npm
+1 info using npm@10.5.2
+2 info using node@v20.13.1
+3 timing npm:load:whichnode Completed in 0ms
+4 timing config:load:defaults Completed in 1ms
+5 timing config:load:file:/Users/sebastian/Library/Application Support/Herd/config/nvm/versions/node/v20.13.1/lib/node_modules/npm/npmrc Completed in 0ms
+6 timing config:load:builtin Completed in 0ms
+7 timing config:load:cli Completed in 2ms
+8 timing config:load:env Completed in 0ms
+9 timing config:load:file:/Users/sebastian/Projects/time.codebar/.npmrc Completed in 1ms
+10 timing config:load:project Completed in 1ms
+11 timing config:load:file:/Users/sebastian/.npmrc Completed in 0ms
+12 timing config:load:user Completed in 0ms
+13 timing config:load:file:/Users/sebastian/Library/Application Support/Herd/config/nvm/versions/node/v20.13.1/etc/npmrc Completed in 0ms
+14 timing config:load:global Completed in 1ms
+15 timing config:load:setEnvs Completed in 0ms
+16 timing config:load Completed in 5ms
+17 timing npm:load:configload Completed in 5ms
+18 timing config:load:flatten Completed in 1ms
+19 timing npm:load:mkdirpcache Completed in 0ms
+20 timing npm:load:mkdirplogs Completed in 1ms
+21 verbose title npm install
+22 verbose argv "install" "--no-audit" "--no-fund" "--ignore-scripts" "--cache" ".npm-cache"
+23 timing npm:load:setTitle Completed in 0ms
+24 timing npm:load:display Completed in 0ms
+25 verbose logfile logs-max:10 dir:/Users/sebastian/Projects/time.codebar/.npm-cache/_logs/2025-10-20T10_30_19_522Z-
+26 verbose logfile /Users/sebastian/Projects/time.codebar/.npm-cache/_logs/2025-10-20T10_30_19_522Z-debug-0.log
+27 timing npm:load:logFile Completed in 1ms
+28 timing npm:load:timers Completed in 0ms
+29 timing npm:load:configScope Completed in 0ms
+30 timing npm:load Completed in 14ms
+31 timing arborist:ctor Completed in 0ms
+32 silly logfile done cleaning log files
+33 timing idealTree:init Completed in 73ms
+34 timing idealTree:userRequests Completed in 1ms
+35 silly idealTree buildDeps
+36 silly fetch manifest eslint-config-prettier@^9.1.0
+37 timing arborist:ctor Completed in 0ms
+38 silly fetch manifest eslint-plugin-vue@^9.30.0
+39 silly fetch manifest globals@^15.12.0
+40 silly placeDep ROOT eslint-config-prettier@ REPLACE for:  want: ^9.1.0
+41 silly placeDep ROOT eslint-plugin-vue@ REPLACE for:  want: ^9.30.0
+42 warn ERESOLVE overriding peer dependency {
+42 warn ERESOLVE   code: 'ERESOLVE',
+42 warn ERESOLVE   edge: {
+42 warn ERESOLVE     type: 'peer',
+42 warn ERESOLVE     name: 'eslint-plugin-vue',
+42 warn ERESOLVE     spec: '^9.28.0 || ^10.0.0',
+42 warn ERESOLVE     from: {
+42 warn ERESOLVE       name: '@vue/eslint-config-typescript',
+42 warn ERESOLVE       version: '14.6.0',
+42 warn ERESOLVE       location: 'node_modules/@vue/eslint-config-typescript',
+42 warn ERESOLVE       isWorkspace: false,
+42 warn ERESOLVE       dependents: [Array]
+42 warn ERESOLVE     }
+42 warn ERESOLVE   },
+42 warn ERESOLVE   dep: {
+42 warn ERESOLVE     name: 'eslint-plugin-vue',
+42 warn ERESOLVE     version: undefined,
+42 warn ERESOLVE     errors: [ [FetchError] ],
+42 warn ERESOLVE     package: {},
+42 warn ERESOLVE     whileInstalling: {
+42 warn ERESOLVE       name: undefined,
+42 warn ERESOLVE       version: undefined,
+42 warn ERESOLVE       path: '/Users/sebastian/Projects/time.codebar'
+42 warn ERESOLVE     },
+42 warn ERESOLVE     location: 'node_modules/eslint-plugin-vue',
+42 warn ERESOLVE     isWorkspace: false,
+42 warn ERESOLVE     dependents: [ [Object] ]
+42 warn ERESOLVE   },
+42 warn ERESOLVE   force: false,
+42 warn ERESOLVE   isMine: true,
+42 warn ERESOLVE   strictPeerDeps: false,
+42 warn ERESOLVE   current: {
+42 warn ERESOLVE     name: 'eslint-plugin-vue',
+42 warn ERESOLVE     version: '10.5.1',
+42 warn ERESOLVE     location: 'node_modules/eslint-plugin-vue',
+42 warn ERESOLVE     isWorkspace: false,
+42 warn ERESOLVE     dependents: [ [Object], [Object] ]
+42 warn ERESOLVE   }
+42 warn ERESOLVE }
+43 silly placeDep ROOT globals@ REPLACE for:  want: ^15.12.0
+44 timing idealTree:#root Completed in 210067ms
+45 timing idealTree:node_modules/@eslint/eslintrc Completed in 0ms
+46 silly fetch manifest eslint-plugin-prettier@^5.2.2
+47 silly placeDep node_modules/@vue/eslint-config-prettier eslint-plugin-prettier@ OK for: @vue/eslint-config-prettier@10.2.0 want: ^5.2.2
+48 timing idealTree:node_modules/@vue/eslint-config-prettier Completed in 70014ms
+49 timing idealTree:node_modules/eslint-config-prettier Completed in 0ms
+50 timing idealTree:node_modules/eslint-plugin-vue Completed in 0ms
+51 timing idealTree:node_modules/globals Completed in 0ms
+52 timing idealTree:node_modules/@vue/eslint-config-prettier/node_modules/eslint-plugin-prettier Completed in 0ms
+53 timing idealTree:buildDeps Completed in 280081ms
+54 timing idealTree:fixDepFlags Completed in 4ms
+55 timing idealTree Completed in 280160ms
+56 timing command:install Completed in 280187ms
+57 verbose type system
+58 verbose stack FetchError: request to https://registry.npmjs.org/eslint-config-prettier failed, reason: getaddrinfo ENOTFOUND registry.npmjs.org
+58 verbose stack     at ClientRequest.<anonymous> (/Users/sebastian/Library/Application Support/Herd/config/nvm/versions/node/v20.13.1/lib/node_modules/npm/node_modules/minipass-fetch/lib/index.js:130:14)
+58 verbose stack     at ClientRequest.emit (node:events:519:28)
+58 verbose stack     at _destroy (node:_http_client:880:13)
+58 verbose stack     at onSocketNT (node:_http_client:900:5)
+58 verbose stack     at process.processTicksAndRejections (node:internal/process/task_queues:83:21)
+59 verbose cwd /Users/sebastian/Projects/time.codebar
+60 verbose Darwin 24.6.0
+61 verbose node v20.13.1
+62 verbose npm  v10.5.2
+63 error code ENOTFOUND
+64 error syscall getaddrinfo
+65 error errno ENOTFOUND
+66 error network request to https://registry.npmjs.org/eslint-config-prettier failed, reason: getaddrinfo ENOTFOUND registry.npmjs.org
+67 error network This is a problem related to network connectivity.
+67 error network In most cases you are behind a proxy or have bad network settings.
+67 error network
+67 error network If you are behind a proxy, please make sure that the
+67 error network 'proxy' config is set properly.  See: 'npm help config'
+68 verbose exit 1
+69 timing npm Completed in 280313ms
+70 verbose unfinished npm timer reify 1760956219648
+71 verbose unfinished npm timer reify:loadTrees 1760956219674
+72 verbose code 1
+73 error A complete log of this run can be found in: /Users/sebastian/Projects/time.codebar/.npm-cache/_logs/2025-10-20T10_30_19_522Z-debug-0.log
