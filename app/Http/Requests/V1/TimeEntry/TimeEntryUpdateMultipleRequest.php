@@ -93,6 +93,11 @@ class TimeEntryUpdateMultipleRequest extends BaseFormRequest
                     return $builder->whereBelongsTo($this->organization, 'organization');
                 })->uuid(),
             ],
+            // When time entry was invoiced (ISO 8601, UTC). Used to mark as invoiced.
+            'changes.invoiced_at' => [
+                'nullable',
+                'date_format:Y-m-d\\TH:i:s\\Z',
+            ],
         ];
     }
 }
