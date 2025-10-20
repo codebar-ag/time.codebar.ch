@@ -1,4 +1,4 @@
---
+git--
 -- PostgreSQL database dump
 --
 
