@@ -12,6 +12,7 @@ import dayjs from 'dayjs';
 import { useNotificationsStore } from '@/utils/notification';
 import type { UpdateMultipleTimeEntriesChangeset } from '@/packages/api/src';
 import { useQueryClient } from '@tanstack/vue-query';
+import axios from 'axios';
 
 export const useTimeEntriesStore = defineStore('timeEntries', () => {
     const timeEntries = ref<TimeEntry[]>(reactive([]));
@@ -174,18 +175,32 @@ export const useTimeEntriesStore = defineStore('timeEntries', () => {
     async function deleteTimeEntry(timeEntryId: string) {
         const organizationId = getCurrentOrganizationId();
         if (organizationId) {
-            await handleApiRequestNotifications(
-                () =>
-                    api.deleteTimeEntry(undefined, {
-                        params: {
-                            organization: organizationId,
-                            timeEntry: timeEntryId,
-                        },
-                    }),
-                'Time entry deleted successfully',
-                'Failed to delete time entry'
-            );
-            await fetchTimeEntries();
+            try {
+                await api.deleteTimeEntry(undefined, {
+                    params: {
+                        organization: organizationId,
+                        timeEntry: timeEntryId,
+                    },
+                });
+                // Success - show success message
+                const { addNotification } = useNotificationsStore();
+                addNotification('success', 'Time entry deleted successfully');
+                await fetchTimeEntries();
+            } catch (error) {
+                // Handle error manually
+                const { addNotification } = useNotificationsStore();
+                if (axios.isAxiosError(error)) {
+                    if (error?.response?.status === 422) {
+                        const message = error.response.data.message;
+                        addNotification('error', message);
+                    } else {
+                        addNotification('error', 'Failed to delete time entry');
+                    }
+                } else {
+                    addNotification('error', 'Failed to delete time entry');
+                }
+                throw error; // Re-throw so the modal knows it failed
+            }
         }
     }
 
@@ -193,20 +208,42 @@ export const useTimeEntriesStore = defineStore('timeEntries', () => {
         const organizationId = getCurrentOrganizationId();
         const timeEntryIds = timeEntries.map((entry) => entry.id);
         if (organizationId) {
-            await handleApiRequestNotifications(
-                () =>
-                    api.deleteTimeEntries(undefined, {
-                        queries: {
-                            ids: timeEntryIds,
-                        },
-                        params: {
-                            organization: organizationId,
-                        },
-                    }),
-                'Time entries deleted successfully',
-                'Failed to delete time entries'
-            );
-            await fetchTimeEntries();
+            try {
+                const response = await api.deleteTimeEntries(undefined, {
+                    queries: {
+                        'ids[]': timeEntryIds,
+                    },
+                    params: {
+                        organization: organizationId,
+                    },
+                });
+
+                // Check if there were any errors in the bulk operation
+                const { success, error } = response;
+                const successCount = success.length;
+                const errorCount = error.length;
+
+                const { addNotification } = useNotificationsStore();
+
+                if (errorCount > 0) {
+                    // Some entries failed to delete (likely invoiced)
+                    if (successCount > 0) {
+                        addNotification('error', `${successCount} time entries deleted successfully, ${errorCount} failed (invoiced entries cannot be deleted)`);
+                    } else {
+                        addNotification('error', 'Cannot delete invoiced time entries');
+                    }
+                } else {
+                    // All entries deleted successfully
+                    addNotification('success', `${successCount} time entries deleted successfully`);
+                }
+
+                await fetchTimeEntries();
+            } catch (error) {
+                // Handle unexpected errors
+                const { addNotification } = useNotificationsStore();
+                addNotification('error', 'Failed to delete time entries');
+                throw error;
+            }
         }
     }
 

@@ -27,11 +27,13 @@ const emptyTimeEntry = {
     tags: [],
     billable: false,
     organization_id: '',
+    invoiced_at: null,
 } as TimeEntry;
 
 export const useCurrentTimeEntryStore = defineStore('currentTimeEntry', () => {
     const currentTimeEntry = ref<TimeEntry>(reactive(emptyTimeEntry));
     const { handleApiRequestNotifications } = useNotificationsStore();
+    const isFetching = ref(false);
 
     useLocalStorage('solidtime/current-time-entry', currentTimeEntry, {
         deep: true,
@@ -59,8 +61,14 @@ export const useCurrentTimeEntryStore = defineStore('currentTimeEntry', () => {
     }
 
     async function fetchCurrentTimeEntry() {
+        // Prevent multiple simultaneous calls
+        if (isFetching.value) {
+            return;
+        }
+
         const organizationId = getCurrentOrganizationId();
         if (organizationId) {
+            isFetching.value = true;
             try {
                 const timeEntriesResponse = await api.getMyActiveTimeEntry({});
                 if (timeEntriesResponse?.data) {
@@ -78,6 +86,8 @@ export const useCurrentTimeEntryStore = defineStore('currentTimeEntry', () => {
                 }
             } catch {
                 currentTimeEntry.value = { ...emptyTimeEntry };
+            } finally {
+                isFetching.value = false;
             }
         } else {
             throw new Error(

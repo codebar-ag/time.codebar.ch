@@ -203,7 +203,7 @@ function onSelectChange(checked: boolean) {
                 indent
                 :update-time-entry="(timeEntry: TimeEntry) => updateTimeEntry(timeEntry)"
                 :on-start-stop-click="() => onStartStopClick(subEntry)"
-                :delete-time-entry="() => deleteTimeEntries([subEntry])"
+                :delete-time-entry="async () => await deleteTimeEntries([subEntry])"
                 :duplicate-time-entry="() => duplicateTimeEntry(subEntry)"
                 :currency="currency"
                 :create-tag

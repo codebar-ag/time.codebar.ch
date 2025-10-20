@@ -18,6 +18,7 @@ import TimeEntryRowDurationInput from '@/packages/ui/src/TimeEntry/TimeEntryRowD
 import TimeEntryMoreOptionsDropdown from '@/packages/ui/src/TimeEntry/TimeEntryMoreOptionsDropdown.vue';
 import { TimeEntryEditModal } from '@/packages/ui/src';
 import BillableToggleButton from '@/packages/ui/src/Input/BillableToggleButton.vue';
+import InvoiceStatusIcon from '@/packages/ui/src/Icons/InvoiceStatusIcon.vue';
 import { computed, ref } from 'vue';
 import TimeTrackerProjectTaskDropdown from '@/packages/ui/src/TimeTracker/TimeTrackerProjectTaskDropdown.vue';
 import { Checkbox } from '@/packages/ui/src';
@@ -35,7 +36,7 @@ const props = defineProps<{
     createProject: (project: CreateProjectBody) => Promise<Project | undefined>;
     createClient: (client: CreateClientBody) => Promise<Client | undefined>;
     onStartStopClick: () => void;
-    deleteTimeEntry: () => void;
+    deleteTimeEntry: () => Promise<void>;
     duplicateTimeEntry?: () => void;
     updateTimeEntry: (timeEntry: TimeEntry) => void;
     currency: string;
@@ -102,7 +103,7 @@ async function handleUpdateTimeEntry(updatedEntry: TimeEntry) {
 }
 
 async function handleDeleteTimeEntry() {
-    props.deleteTimeEntry();
+    await props.deleteTimeEntry();
     showEditModal.value = false;
 }
 </script>
@@ -150,6 +151,10 @@ async function handleDeleteTimeEntry() {
                         "
                         size="small"
                         @changed="updateTimeEntryBillable"></BillableToggleButton>
+                    <InvoiceStatusIcon
+                        :invoiced="!!timeEntry.invoiced_at"
+                        size="small"
+                        class="opacity-50 group-hover:opacity-100 focus-visible:opacity-100" />
                     <div class="flex-1">
                         <TimeEntryRangeSelector
                             :start="timeEntry.start"

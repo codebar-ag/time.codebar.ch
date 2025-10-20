@@ -199,7 +199,7 @@ function unselectAllTimeEntries(value: TimeEntriesGroupedByType[]) {
                 :create-tag
                 :update-time-entry
                 :on-start-stop-click="() => startTimeEntryFromExisting(entry)"
-                :delete-time-entry="() => deleteTimeEntries([entry])"
+                :delete-time-entry="async () => await deleteTimeEntries([entry])"
                 :duplicate-time-entry="() => createTimeEntry(entry)"
                 :currency="currency"
                 :time-entry="entry.timeEntries[0]"

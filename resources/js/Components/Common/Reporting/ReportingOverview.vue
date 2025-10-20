@@ -103,7 +103,7 @@ function getFilterAttributes(): AggregatedTimeEntriesQueryParams {
         member_id: getCurrentRole() === 'employee' ? getCurrentMembershipId() : undefined,
         rounding_type: roundingEnabled.value ? roundingType.value : undefined,
         rounding_minutes: roundingEnabled.value ? roundingMinutes.value : undefined,
-    };
+    } as AggregatedTimeEntriesQueryParams;
     return params;
 }
 

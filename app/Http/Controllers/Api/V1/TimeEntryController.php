@@ -10,6 +10,7 @@ use App\Exceptions\Api\FeatureIsNotAvailableInFreePlanApiException;
 use App\Exceptions\Api\OverlappingTimeEntryApiException;
 use App\Exceptions\Api\PdfRendererIsNotConfiguredException;
 use App\Exceptions\Api\TimeEntryCanNotBeRestartedApiException;
+use App\Exceptions\Api\TimeEntryInvoicedApiException;
 use App\Exceptions\Api\TimeEntryStillRunningApiException;
 use App\Http\Requests\V1\TimeEntry\TimeEntryAggregateExportRequest;
 use App\Http\Requests\V1\TimeEntry\TimeEntryAggregateRequest;
@@ -100,6 +101,11 @@ class TimeEntryController extends Controller
         parent::checkPermission($organization, $permission);
         if ($timeEntry !== null && $timeEntry->organization_id !== $organization->getKey()) {
             throw new AuthorizationException('Time entry does not belong to organization');
+        }
+        if ($timeEntry !== null && $timeEntry->invoiced_at !== null) {
+            if (in_array($permission, ['time-entries:update:own', 'time-entries:update:all', 'time-entries:delete:own', 'time-entries:delete:all'], true)) {
+                throw new TimeEntryInvoicedApiException;
+            }
         }
     }
 
@@ -628,9 +634,9 @@ class TimeEntryController extends Controller
         /** @var Member|null $member */
         $member = $request->has('member_id') ? Member::query()->findOrFail($request->input('member_id')) : null;
         if ($timeEntry->member->user_id === Auth::id() && ($member === null || $member->user_id === Auth::id())) {
-            $this->checkPermission($organization, 'time-entries:update:own');
+            $this->checkPermission($organization, 'time-entries:update:own', $timeEntry);
         } else {
-            $this->checkPermission($organization, 'time-entries:update:all');
+            $this->checkPermission($organization, 'time-entries:update:all', $timeEntry);
         }
 
         if ($timeEntry->end !== null && $request->has('end') && $request->input('end') === null) {
@@ -744,6 +750,11 @@ class TimeEntryController extends Controller
                 continue;
 
             }
+            if ($timeEntry->invoiced_at !== null) {
+                $error->push($id);
+
+                continue;
+            }
             $oldProject = $timeEntry->project;
             $oldTask = $timeEntry->task;
 
@@ -850,6 +861,11 @@ class TimeEntryController extends Controller
 
                 continue;
 
+            }
+            if ($timeEntry->invoiced_at !== null) {
+                $error->push($id);
+
+                continue;
             }
 
             $project = $timeEntry->project;
