@@ -9,7 +9,7 @@ import {
     type Project,
     type TimeEntryResponse,
 } from '@/packages/api/src';
-import { getCurrentOrganizationId } from '@/utils/useUser';
+import { getCurrentOrganizationId, getCurrentMembershipId } from '@/utils/useUser';
 import { computed, ref } from 'vue';
 import { getDayJsInstance } from '@/packages/ui/src/utils/time';
 import { TimeEntryCalendar } from '@/packages/ui/src';
@@ -21,6 +21,8 @@ import { useClientsStore } from '@/utils/useClients';
 import { storeToRefs } from 'pinia';
 import { useTasksStore } from '@/utils/useTasks';
 import { getUserTimezone } from '@/packages/ui/src/utils/settings';
+import { getOrganizationCurrencyString } from '@/utils/money';
+import { canCreateProjects } from '@/utils/permissions';
 
 const calendarStart = ref<Date | undefined>(undefined);
 const calendarEnd = ref<Date | undefined>(undefined);
@@ -73,6 +75,7 @@ const { data: timeEntryResponse, isLoading: timeEntriesLoading } = useQuery<Time
             queries: {
                 start: expandedDateRange.value.start!,
                 end: expandedDateRange.value.end!,
+                member_id: getCurrentMembershipId(),
             },
         }),
 });
@@ -128,6 +131,8 @@ function onRefresh() {
             :tags="tags"
             :loading="timeEntriesLoading"
             :enable-estimated-time="isAllowedToPerformPremiumAction()"
+            :currency="getOrganizationCurrencyString()"
+            :can-create-project="canCreateProjects()"
             :create-time-entry="createTimeEntry"
             :update-time-entry="updateTimeEntry"
             :delete-time-entry="deleteTimeEntry"
