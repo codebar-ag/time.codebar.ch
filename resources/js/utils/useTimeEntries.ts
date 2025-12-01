@@ -217,7 +217,7 @@ export const useTimeEntriesStore = defineStore(
                     () =>
                         api.deleteTimeEntries(undefined, {
                             queries: {
-                                "ids[]": timeEntryIds,
+                                'ids[]': timeEntryIds,
                             },
                             params: {
                                 organization: organizationId,
