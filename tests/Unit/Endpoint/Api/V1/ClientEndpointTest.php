@@ -82,6 +82,11 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         // Assert
         $response->assertStatus(200);
         $response->assertJsonCount(2, 'data');
+        $clients = Client::query()
+            ->whereBelongsTo($data->organization, 'organization')
+            ->visibleByEmployee($data->user)
+            ->orderBy('name')
+            ->get();
         $response->assertJson(fn (AssertableJson $json) => $json
             ->has('data')
             ->has('links')
