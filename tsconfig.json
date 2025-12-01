@@ -10,9 +10,8 @@
       "resources/js/types"
     ],
     "paths": {
-      "@/*": [
-        "./resources/js/*"
-      ]
+      "@/*": ["./resources/js/*"],
+      "@solidtime/ui": ["./resources/js/packages/ui/src/index.ts"]
     }
   },
   "include": [
