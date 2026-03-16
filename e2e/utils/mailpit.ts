@@ -65,10 +65,7 @@ export async function getPasswordResetUrl(
 
     // Retry up to 5 times with 500ms delay to allow for email delivery
     for (let attempt = 0; attempt < 5; attempt++) {
-        searchResult = await searchEmails(
-            request,
-            `to:${recipientEmail} subject:"Reset Password"`
-        );
+        searchResult = await searchEmails(request, `to:${recipientEmail} subject:"Reset Password"`);
         if (searchResult.messages.length > 0) break;
         await new Promise((resolve) => setTimeout(resolve, 500));
     }
