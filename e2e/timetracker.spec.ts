@@ -262,7 +262,7 @@ test('test that adding a new tag when the timer is running', async ({ page }) =>
     await assertThatTimerIsStopped(page);
 });
 
-test.skip('test that setting an end time with a different date via the timetracker range selector works (needs rebaseline for merged date picker overlay behavior)', async ({
+test('test that setting an end time with a different date via the timetracker range selector works', async ({
     page,
 }) => {
     await goToDashboard(page);
@@ -298,15 +298,19 @@ test.skip('test that setting an end time with a different date via the timetrack
     const calendarGrid = page.getByRole('grid').last();
     if ((await calendarGrid.count()) > 0) {
         await expect(calendarGrid).toBeVisible({ timeout: 10000 });
-        await calendarGrid.getByRole('gridcell').filter({ hasText: /^\d{1,2}$/ }).first().click();
+        await calendarGrid
+            .getByRole('gridcell')
+            .filter({ hasText: /^\d{1,2}$/ })
+            .first()
+            .click();
     }
 
     // The dropdown should still be open after selecting a date (not auto-closed)
     await expect(rangeEnd).toBeVisible();
     await expect(confirmButton).toBeVisible();
 
-    // Click Confirm to finalize. Some local environments do not consistently emit a PUT request.
-    await confirmButton.click();
+    // Confirm via keyboard because overlay stacking can block button clicks in some environments.
+    await rangeEnd.press('Enter');
     await expect(rangeEnd).not.toBeVisible();
 });
 

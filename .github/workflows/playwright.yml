@@ -98,7 +98,7 @@ jobs:
           retention-days: 7
 
   merge-reports:
-    if: always()
+    if: needs.test.result == 'success'
     needs: [test]
     runs-on: ubuntu-latest
     steps:

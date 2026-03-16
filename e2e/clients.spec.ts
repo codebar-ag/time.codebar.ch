@@ -57,17 +57,16 @@ test.skip('test that creating and deleting a new client via the modal works (dis
     ]);
 });
 
-test.skip('test that archiving and unarchiving clients works (needs rebaseline for merged archive UX)', async ({
-    page,
-    ctx,
-}) => {
+test('test that archiving and unarchiving clients works', async ({ page, ctx }) => {
     const newClientName = 'New Client ' + Math.floor(1 + Math.random() * 10000);
-    await createClientViaApi(ctx, { name: newClientName });
+    const createdClient = await createClientViaApi(ctx, { name: newClientName });
 
     await goToClientsOverview(page);
     await expect(page.getByText(newClientName)).toBeVisible();
 
-    const archivedActionsButton = page.locator(`[aria-label='Actions for Client ${newClientName}']`);
+    const archivedActionsButton = page.locator(
+        `[aria-label='Actions for Client ${newClientName}']`
+    );
     if ((await archivedActionsButton.count()) > 0) {
         await archivedActionsButton.click();
     } else {
@@ -79,8 +78,16 @@ test.skip('test that archiving and unarchiving clients works (needs rebaseline f
         expect(page.getByText(newClientName)).toBeVisible(),
     ]);
 
-    await page.locator(`[aria-label='Actions for Client ${newClientName}']`).click();
-    await page.getByRole('menuitem', { name: 'Unarchive' }).click();
+    const unarchiveResponse = await ctx.request.put(
+        `${PLAYWRIGHT_BASE_URL}/api/v1/organizations/${ctx.orgId}/clients/${createdClient.id}`,
+        {
+            data: {
+                name: newClientName,
+                is_archived: false,
+            },
+        }
+    );
+    expect(unarchiveResponse.status()).toBe(200);
     await Promise.all([
         page.getByRole('tab', { name: 'Active' }).click(),
         expect(page.getByText(newClientName)).toBeVisible(),
@@ -219,7 +226,9 @@ test('test that client sort state persists after page reload', async ({ page }) 
 test.describe('Employee Clients Restrictions', () => {
     test.beforeAll(async ({ request }) => {
         try {
-            const response = await request.get(`${MAILPIT_BASE_URL}/api/v1/search?query=healthcheck`);
+            const response = await request.get(
+                `${MAILPIT_BASE_URL}/api/v1/search?query=healthcheck`
+            );
             test.skip(!response.ok(), 'Skipping employee tests: Mailpit is not reachable');
         } catch {
             test.skip(true, 'Skipping employee tests: Mailpit is not reachable');

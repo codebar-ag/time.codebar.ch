@@ -9,7 +9,8 @@ export async function searchEmails(
     request: APIRequestContext,
     query: string
 ): Promise<{ messages: Array<{ ID: string; Subject: string }> }> {
-    const response = await request.get(`${MAILPIT_BASE_URL}/api/v1/search?query=${query}`);
+    const encodedQuery = encodeURIComponent(query);
+    const response = await request.get(`${MAILPIT_BASE_URL}/api/v1/search?query=${encodedQuery}`);
     return response.json();
 }
 
@@ -38,7 +39,7 @@ export async function getInvitationAcceptUrl(
     for (let attempt = 0; attempt < 5; attempt++) {
         searchResult = await searchEmails(
             request,
-            `to:${encodeURIComponent(recipientEmail)} subject:"Organization Invitation"`
+            `to:${recipientEmail} subject:"Organization Invitation"`
         );
         if (searchResult.messages.length > 0) break;
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -66,7 +67,7 @@ export async function getPasswordResetUrl(
     for (let attempt = 0; attempt < 5; attempt++) {
         searchResult = await searchEmails(
             request,
-            `to:${encodeURIComponent(recipientEmail)} subject:"Reset Password"`
+            `to:${recipientEmail} subject:"Reset Password"`
         );
         if (searchResult.messages.length > 0) break;
         await new Promise((resolve) => setTimeout(resolve, 500));
