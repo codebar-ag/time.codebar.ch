@@ -2,47 +2,52 @@
 import MainContainer from '@/packages/ui/src/MainContainer.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { PlusIcon } from '@heroicons/vue/16/solid';
-import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import { UserCircleIcon } from '@heroicons/vue/20/solid';
-import { computed, onMounted, ref } from 'vue';
-import type { Client } from '@/packages/api/src';
-import { useClientsStore } from '@/utils/useClients';
+import { computed, ref } from 'vue';
+import { useClientsQuery } from '@/utils/useClientsQuery';
 import ClientTable from '@/Components/Common/Client/ClientTable.vue';
 import ClientCreateModal from '@/Components/Common/Client/ClientCreateModal.vue';
 import PageTitle from '@/Components/Common/PageTitle.vue';
 import { canCreateClients } from '@/utils/permissions';
 import TabBarItem from '@/Components/Common/TabBar/TabBarItem.vue';
 import TabBar from '@/Components/Common/TabBar/TabBar.vue';
-import { storeToRefs } from 'pinia';
+import { useStorage } from '@vueuse/core';
+import type { SortColumn, SortDirection } from '@/Components/Common/Client/ClientTable.vue';
 
-onMounted(() => {
-    useClientsStore().fetchClients();
-});
+const { clients } = useClientsQuery();
 
 const activeTab = ref<'active' | 'archived'>('active');
 
 const createClient = ref(false);
 
-const { clients } = storeToRefs(useClientsStore());
-const searchQuery = ref('');
+interface ClientTableState {
+    sortColumn: SortColumn;
+    sortDirection: SortDirection;
+}
+
+const tableState = useStorage<ClientTableState>(
+    'client-table-state',
+    {
+        sortColumn: 'name',
+        sortDirection: 'asc',
+    },
+    undefined,
+    { mergeDefaults: true }
+);
+
+function handleSort(column: SortColumn, direction: SortDirection) {
+    tableState.value.sortColumn = column;
+    tableState.value.sortDirection = direction;
+}
 
 const shownClients = computed(() => {
-    let filteredClients = clients.value.filter((client: Client) => {
+    return clients.value.filter((client) => {
         if (activeTab.value === 'active') {
             return !client.is_archived;
         }
         return client.is_archived;
     });
-
-    if (searchQuery.value.trim()) {
-        const query = searchQuery.value.toLowerCase().trim();
-        filteredClients = filteredClients.filter((client: Client) => {
-            return client.name.toLowerCase().includes(query);
-        });
-    }
-
-    return filteredClients;
 });
 </script>
 
@@ -57,27 +62,15 @@ const shownClients = computed(() => {
                     <TabBarItem value="archived"> Archived </TabBarItem>
                 </TabBar>
             </div>
-            <div class="flex items-center space-x-3">
-                <div class="relative">
-                    <div
-                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
-                    </div>
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        placeholder="Search clients..."
-                        class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm" />
-                </div>
-                <SecondaryButton
-                    v-if="canCreateClients()"
-                    :icon="PlusIcon"
-                    @click="createClient = true"
-                    >Create Client</SecondaryButton
-                >
-            </div>
+            <SecondaryButton v-if="canCreateClients()" :icon="PlusIcon" @click="createClient = true"
+                >Create Client</SecondaryButton
+            >
             <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
         </MainContainer>
-        <ClientTable :clients="shownClients"></ClientTable>
+        <ClientTable
+            :clients="shownClients"
+            :sort-column="tableState.sortColumn"
+            :sort-direction="tableState.sortDirection"
+            @sort="handleSort"></ClientTable>
     </AppLayout>
 </template>

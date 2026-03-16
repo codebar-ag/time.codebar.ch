@@ -15,13 +15,22 @@ import {
     onActivated,
     onUnmounted,
 } from 'vue';
+import { useLocalStorage } from '@vueuse/core';
 import chroma from 'chroma-js';
 import { useCssVariable } from '@/utils/useCssVariable';
-import { getDayJsInstance, getLocalizedDayJs } from '../utils/time';
+import {
+    getDayJsInstance,
+    getLocalizedDayJs,
+    formatHumanReadableDuration,
+    formatDuration,
+} from '../utils/time';
 import { getUserTimezone, getWeekStart } from '../utils/settings';
 import { LoadingSpinner, TimeEntryCreateModal, TimeEntryEditModal } from '..';
 import FullCalendarEventContent from './FullCalendarEventContent.vue';
 import FullCalendarDayHeader from './FullCalendarDayHeader.vue';
+import CalendarSettingsPopover from './CalendarSettingsPopover.vue';
+import type { CalendarSettings } from './calendarSettings';
+import { useVisualSnap } from './useVisualSnap';
 import activityStatusPlugin, {
     type ActivityPeriod,
     renderActivityStatusBoxes,
@@ -80,6 +89,22 @@ const showEditTimeEntryModal = ref<boolean>(false);
 const selectedTimeEntry = ref<TimeEntry | null>(null);
 
 const calendarRef = ref<InstanceType<typeof FullCalendar> | null>(null);
+
+// Calendar settings with localStorage persistence via VueUse
+const calendarSettings = useLocalStorage<CalendarSettings>(
+    'solidtime:calendar-settings',
+    {
+        snapMinutes: 15,
+        startHour: 0,
+        endHour: 24,
+        slotMinutes: 15,
+    },
+    { mergeDefaults: true }
+);
+
+function onSettingsUpdate(newSettings: CalendarSettings) {
+    calendarSettings.value = newSettings;
+}
 
 // Reactive "now" for running time entry - updates every minute
 const currentTime = ref(getDayJsInstance()());
@@ -179,20 +204,20 @@ const dailyTotals = computed(() => {
     const totals: Record<string, number> = {};
     props.timeEntries.forEach((entry) => {
         const date = getDayJsInstance()(entry.start).format('YYYY-MM-DD');
-        let duration: number;
+        let durationSeconds: number;
 
         if (entry.end !== null) {
             // Completed entry
-            duration = getDayJsInstance()(entry.end).diff(
+            durationSeconds = getDayJsInstance()(entry.end).diff(
                 getDayJsInstance()(entry.start),
-                'minutes'
+                'seconds'
             );
         } else {
             // Running entry - use current time
-            duration = currentTime.value.diff(getDayJsInstance()(entry.start), 'minutes');
+            durationSeconds = currentTime.value.diff(getDayJsInstance()(entry.start), 'seconds');
         }
 
-        totals[date] = (totals[date] || 0) + duration;
+        totals[date] = (totals[date] || 0) + durationSeconds;
     });
     return totals;
 });
@@ -204,16 +229,19 @@ function emitDatesChange(arg: DatesSetArg) {
 }
 
 function handleDateSelect(arg: { start: Date; end: Date }) {
-    const startTime = getDayJsInstance()(arg.start.toISOString())
+    stopVisualSnap();
+    const snap = calendarSettings.value.snapMinutes;
+    const startLocal = getDayJsInstance()(arg.start.toISOString())
         .utc()
-        .tz(getUserTimezone(), true)
-        .utc();
-    const endTime = getDayJsInstance()(arg.end.toISOString())
-        .utc()
-        .tz(getUserTimezone(), true)
-        .utc();
-    newEventStart.value = startTime;
-    newEventEnd.value = endTime;
+        .tz(getUserTimezone(), true);
+    const endLocal = getDayJsInstance()(arg.end.toISOString()).utc().tz(getUserTimezone(), true);
+    const snappedStart = snapStartToGrid(startLocal, snap);
+    let snappedEnd = snapEndToGrid(endLocal, snap);
+    if (!snappedEnd.isAfter(snappedStart)) {
+        snappedEnd = snappedStart.add(snap, 'minute');
+    }
+    newEventStart.value = snappedStart.utc();
+    newEventEnd.value = snappedEnd.utc();
     showCreateTimeEntryModal.value = true;
 }
 
@@ -227,90 +255,143 @@ function handleEventClick(arg: EventClickArg) {
     showEditTimeEntryModal.value = true;
 }
 
+// Snap a dayjs time down to the previous snap boundary (for start times)
+function snapStartToGrid(time: Dayjs, snapMinutes: number): Dayjs {
+    const minutes = time.hour() * 60 + time.minute();
+    const snapped = Math.floor(minutes / snapMinutes) * snapMinutes;
+    return time.startOf('day').add(snapped, 'minute');
+}
+
+// Snap a dayjs time up to the next snap boundary (for end times)
+function snapEndToGrid(time: Dayjs, snapMinutes: number): Dayjs {
+    const minutes = time.hour() * 60 + time.minute();
+    const snapped = Math.ceil(minutes / snapMinutes) * snapMinutes;
+    return time.startOf('day').add(snapped, 'minute');
+}
+
+// --- Visual snap (composable) ---
+const {
+    startDragSnap: startVisualDragSnap,
+    startResizeSnap: startVisualResizeSnap,
+    stop: stopVisualSnap,
+} = useVisualSnap({
+    calendarRef,
+    snapMinutes: () => calendarSettings.value.snapMinutes,
+    slotMinutes: () => calendarSettings.value.slotMinutes,
+    formatDuration: (seconds) =>
+        formatHumanReadableDuration(
+            seconds,
+            organization?.value?.interval_format,
+            organization?.value?.number_format
+        ),
+});
+
 async function handleEventDrop(arg: EventDropArg) {
+    stopVisualSnap();
     const ext = arg.event.extendedProps as CalendarExtendedProps;
     const timeEntry = ext.timeEntry;
     if (!arg.event.start || !arg.event.end) return;
+    // Running entries have no end time — can't compute duration for drop
+    if (!timeEntry.end) return;
+    const snap = calendarSettings.value.snapMinutes;
+    const startLocal = getDayJsInstance()(arg.event.start.toISOString())
+        .utc()
+        .tz(getUserTimezone(), true)
+        .second(0);
+    const snappedStart = snapStartToGrid(startLocal, snap);
+    const durationMs = getLocalizedDayJs(timeEntry.end).diff(getLocalizedDayJs(timeEntry.start));
+    const snappedEnd = snappedStart.add(durationMs, 'millisecond');
+    // Set FC event to snapped position immediately to avoid flash
+    arg.event.setDates(snappedStart.utc(true).toDate(), snappedEnd.utc(true).toDate());
     const updatedTimeEntry = {
         ...timeEntry,
-        start: getDayJsInstance()(arg.event.start.toISOString())
-            .utc()
-            .tz(getUserTimezone(), true)
-            .second(0)
-            .utc()
-            .format(),
-        end: getDayJsInstance()(arg.event.end.toISOString())
-            .utc()
-            .tz(getUserTimezone(), true)
-            .second(0)
-            .utc()
-            .format(),
+        start: snappedStart.utc().format(),
+        end: snappedEnd.utc().format(),
     } as TimeEntry;
     await props.updateTimeEntry(updatedTimeEntry);
     emit('refresh');
 }
 
 async function handleEventResize(arg: EventChangeArg) {
+    stopVisualSnap();
     const ext = arg.event.extendedProps as CalendarExtendedProps;
     const timeEntry = ext.timeEntry;
     if (!arg.event.start || !arg.event.end) return;
+    const snap = calendarSettings.value.snapMinutes;
+
+    const newStartLocal = getDayJsInstance()(arg.event.start.toISOString())
+        .utc()
+        .tz(getUserTimezone(), true)
+        .second(0);
+    const newEndLocal = getDayJsInstance()(arg.event.end.toISOString())
+        .utc()
+        .tz(getUserTimezone(), true)
+        .second(0);
+    const origStartLocal = getLocalizedDayJs(timeEntry.start).second(0);
+
+    const startChanged = !newStartLocal.isSame(origStartLocal, 'minute');
+
+    // Snap only the changed edge once, reuse for both setDates and API update
+    const snappedStart = startChanged ? snapStartToGrid(newStartLocal, snap) : null;
+    const snappedEnd = !startChanged && !ext.isRunning ? snapEndToGrid(newEndLocal, snap) : null;
+
+    // Set FC event to snapped position immediately to avoid flash.
+    // Use the original event date for the edge that wasn't resized.
+    if (snappedStart) {
+        arg.event.setDates(snappedStart.utc(true).toDate(), arg.oldEvent.end!);
+    } else if (snappedEnd) {
+        arg.event.setDates(arg.oldEvent.start!, snappedEnd.utc(true).toDate());
+    }
     const updatedTimeEntry = {
         ...timeEntry,
-        start: getDayJsInstance()(arg.event.start.toISOString())
-            .utc()
-            .tz(getUserTimezone(), true)
-            .second(0)
-            .utc()
-            .format(),
-        // Preserve null end for running entries
-        end: ext.isRunning
-            ? null
-            : getDayJsInstance()(arg.event.end.toISOString())
-                  .utc()
-                  .tz(getUserTimezone(), true)
-                  .second(0)
-                  .utc()
-                  .format(),
+        start: snappedStart ? snappedStart.utc().format() : timeEntry.start,
+        end: ext.isRunning ? null : snappedEnd ? snappedEnd.utc().format() : timeEntry.end,
     } as TimeEntry;
     await props.updateTimeEntry(updatedTimeEntry);
     emit('refresh');
 }
 
-const calendarOptions = computed(() => ({
-    plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, activityStatusPlugin],
-    initialView: 'timeGridWeek',
-    headerToolbar: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'timeGridWeek,timeGridDay',
-    },
-    height: 'parent',
-    slotMinTime: '00:00:00',
-    slotMaxTime: '24:00:00',
-    slotDuration: '00:15:00',
-    slotLabelInterval: '01:00:00',
-    slotLabelFormat: getSlotLabelFormat(),
-    snapDuration: '00:01:00',
-    firstDay: getFirstDay(),
-    allDaySlot: false,
-    nowIndicator: true,
-    eventMinHeight: 1,
-    selectable: true,
-    selectMirror: true,
-    editable: true,
-    eventResizableFromStart: true,
-    eventDurationEditable: true,
-    timeZone: getUserTimezone(),
-    eventStartEditable: true,
-    select: handleDateSelect,
-    eventClick: handleEventClick,
-    eventDrop: handleEventDrop,
-    eventResize: handleEventResize,
-    datesSet: emitDatesChange,
+const calendarOptions = computed(() => {
+    const s = calendarSettings.value;
 
-    events: events.value,
-    activityPeriods: props.activityPeriods || [],
-}));
+    return {
+        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin, activityStatusPlugin],
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'timeGridWeek,timeGridDay',
+        },
+        height: 'parent',
+        slotMinTime: formatDuration(s.startHour * 3600),
+        slotMaxTime: formatDuration(s.endHour * 3600),
+        slotDuration: formatDuration(s.slotMinutes * 60),
+        slotLabelInterval: '01:00:00',
+        slotLabelFormat: getSlotLabelFormat(),
+        snapDuration: '00:01:00',
+        firstDay: getFirstDay(),
+        allDaySlot: false,
+        nowIndicator: true,
+        eventMinHeight: 1,
+        selectable: true,
+        selectMirror: true,
+        editable: true,
+        eventResizableFromStart: true,
+        eventDurationEditable: true,
+        timeZone: getUserTimezone(),
+        eventStartEditable: true,
+        select: handleDateSelect,
+        eventClick: handleEventClick,
+        eventDragStart: startVisualDragSnap,
+        eventDrop: handleEventDrop,
+        eventResizeStart: startVisualResizeSnap,
+        eventResize: handleEventResize,
+        datesSet: emitDatesChange,
+
+        events: events.value,
+        activityPeriods: props.activityPeriods || [],
+    };
+});
 
 watch(showCreateTimeEntryModal, (value) => {
     if (!value) {
@@ -376,7 +457,6 @@ onActivated(() => {
 });
 
 onUnmounted(() => {
-    // Clean up interval
     if (currentTimeInterval) {
         clearInterval(currentTimeInterval);
         currentTimeInterval = null;
@@ -424,6 +504,11 @@ onUnmounted(() => {
             :clients="clients"
             :currency="currency"
             :can-create-project="canCreateProject" />
+        <div class="calendar-settings-trigger">
+            <CalendarSettingsPopover
+                :settings="calendarSettings"
+                @update:settings="onSettingsUpdate" />
+        </div>
         <FullCalendar ref="calendarRef" class="fullcalendar" :options="calendarOptions">
             <template #eventContent="arg">
                 <FullCalendarEventContent
@@ -444,7 +529,7 @@ onUnmounted(() => {
                     :date="
                         getDayJsInstance()(arg.date.toISOString()).utc().tz(getUserTimezone(), true)
                     "
-                    :total-minutes="
+                    :total-seconds="
                         dailyTotals[
                             getDayJsInstance()(arg.date)
                                 .utc()
@@ -458,6 +543,13 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.calendar-settings-trigger {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 20;
+}
+
 .fullcalendar {
     height: 100%;
     --fc-border-color: var(--border);
@@ -482,6 +574,7 @@ onUnmounted(() => {
 .fullcalendar :deep(.fc-toolbar) {
     background-color: var(--background);
     padding: 0.5rem;
+    padding-right: 2.75rem;
     margin-bottom: 0;
 }
 
@@ -548,7 +641,7 @@ onUnmounted(() => {
 }
 
 .fullcalendar :deep(.fc-day-today.fc-col-header-cell) {
-    background-color: var(--color-accent-default);
+    background-color: var(--color-bg-secondary);
 }
 
 .fullcalendar :deep(.fc-day-today) {
@@ -580,36 +673,65 @@ onUnmounted(() => {
     line-height: 1.2;
 }
 
-/* Enhanced FullCalendar resize handles */
+/* Resize handle hit areas */
 .fullcalendar :deep(.fc-event-resizer) {
     position: absolute;
     z-index: 99;
-    background: '#FFF';
-    border-radius: 2px;
     width: 100%;
-    height: 4px;
+    height: 12px;
     left: 0;
-    transition: all 0.2s ease;
+    cursor: row-resize;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
+    transition: opacity 0.15s ease;
 }
 
 .fullcalendar :deep(.fc-event-resizer-start) {
     top: -2px;
-    cursor: n-resize;
 }
 
 .fullcalendar :deep(.fc-event-resizer-end) {
     bottom: -2px;
-    cursor: s-resize;
+}
+
+/* Visual grip indicator */
+.fullcalendar :deep(.fc-event-resizer::after) {
+    content: '';
+    width: 24px;
+    height: 3px;
+    border-radius: 1.5px;
+    background: rgba(255, 255, 255, 0.6);
+    transition: background 0.15s ease;
 }
 
 .fullcalendar :deep(.fc-event:hover .fc-event-resizer) {
     opacity: 1;
 }
 
-.fullcalendar :deep(.fc-event-resizer:hover) {
-    background: '#FFF';
-    height: 6px;
+.fullcalendar :deep(.fc-event-resizer:hover::after) {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* Keep resize cursor during active resize */
+.fullcalendar :deep(.fc-event-resizing),
+.fullcalendar :deep(.fc-event-resizing .fc-event-resizer) {
+    cursor: row-resize !important;
+}
+
+/* Keep event in hover state while resizing */
+.fullcalendar :deep(.fc-event-resizing) {
+    opacity: 1;
+    box-shadow: var(--theme-shadow-dropdown);
+}
+
+.fullcalendar :deep(.fc-event-resizing .fc-event-resizer) {
+    opacity: 1;
+}
+
+.fullcalendar :deep(.fc-event-resizing .fc-event-resizer::after) {
+    background: rgba(255, 255, 255, 0.9);
 }
 
 /* Update the earlier hover rule to include the shadow */
@@ -630,6 +752,10 @@ onUnmounted(() => {
 .fullcalendar :deep(.fc-select-mirror) {
     background-color: var(--accent);
     border: 1px solid var(--primary);
+}
+
+.fullcalendar :deep(.fc-event-mirror) {
+    pointer-events: none;
 }
 
 .fullcalendar :deep(.fc-scrollgrid) {
@@ -712,28 +838,41 @@ onUnmounted(() => {
 
 /* Activity status plugin styles */
 .fullcalendar :deep(.activity-status-box) {
+    position: absolute;
+    width: 10px;
+    left: 0px;
+    z-index: 10;
+    cursor: default;
+}
+
+.fullcalendar :deep(.activity-status-box::before) {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 5px;
     transition: opacity 0.2s ease;
 }
 
-.fullcalendar :deep(.activity-status-box.idle) {
-    background-color: rgba(156, 163, 175, 0.1) !important;
+.fullcalendar :deep(.activity-status-box.idle::before) {
+    background-color: rgba(156, 163, 175, 0.1);
 }
 
-.fullcalendar :deep(.activity-status-box.idle):hover {
-    background-color: rgba(156, 163, 175, 0.5) !important;
+.fullcalendar :deep(.activity-status-box.idle):hover::before {
+    background-color: rgba(156, 163, 175, 0.5);
 }
 
-.fullcalendar :deep(.activity-status-box.active) {
-    background-color: rgba(34, 197, 94, 0.3) !important;
+.fullcalendar :deep(.activity-status-box.active::before) {
+    background-color: rgba(34, 197, 94, 0.3);
 }
 
-.fullcalendar :deep(.activity-status-box.active):hover {
-    background-color: rgba(34, 197, 94, 1) !important;
+.fullcalendar :deep(.activity-status-box.active):hover::before {
+    background-color: rgba(34, 197, 94, 1);
 }
 
 /* Add left margin to events only on days with activity status data */
 .fullcalendar :deep(.has-activity-status .fc-timegrid-event-harness) {
-    margin-left: 15px !important;
+    margin-left: 8px !important;
 }
 
 .fullcalendar :deep(.fc-timegrid-event) {
@@ -748,5 +887,13 @@ onUnmounted(() => {
 .fullcalendar :deep(.running-entry) {
     border-bottom-left-radius: 0px;
     border-bottom-right-radius: 0px;
+}
+</style>
+
+<style>
+/* Global cursor override during resize — must be unscoped to affect body */
+body.fc-resizing-active,
+body.fc-resizing-active * {
+    cursor: row-resize !important;
 }
 </style>

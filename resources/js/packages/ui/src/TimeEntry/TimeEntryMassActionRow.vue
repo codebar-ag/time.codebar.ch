@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MainContainer from '@/packages/ui/src/MainContainer.vue';
-import { PencilSquareIcon, TrashIcon, DocumentTextIcon } from '@heroicons/vue/20/solid';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/20/solid';
 import TimeEntryMassUpdateModal from '@/packages/ui/src/TimeEntry/TimeEntryMassUpdateModal.vue';
 import type {
     Client,
@@ -14,9 +14,8 @@ import type {
 } from '@/packages/api/src';
 import { ref } from 'vue';
 import { twMerge } from 'tailwind-merge';
-import { Checkbox, InputLabel } from '@/packages/ui/src';
-import dayjs from 'dayjs';
-import { getCurrentRole } from '@/utils/useUser';
+import { Checkbox } from '@/packages/ui/src';
+import { FieldLabel } from '../field';
 
 const props = defineProps<{
     selectedTimeEntries: TimeEntry[];
@@ -43,18 +42,6 @@ const emit = defineEmits<{
 }>();
 
 const showMassUpdateModal = ref(false);
-
-async function markAsInvoiced() {
-    if (props.selectedTimeEntries.length === 0) return;
-    await props.updateTimeEntries({
-        invoiced_at: dayjs().utc().format('YYYY-MM-DDTHH:mm:ss[Z]'),
-    });
-    emit('submit');
-}
-
-const canMarkAsInvoiced = ['owner', 'administrator', 'manager'].includes(
-    (getCurrentRole() || '').toString()
-);
 </script>
 
 <template>
@@ -77,22 +64,22 @@ const canMarkAsInvoiced = ['owner', 'administrator', 'manager'].includes(
         :class="
             twMerge(
                 props.class,
-                'text-sm py-1.5 font-medium bg-secondary flex items-center space-x-3'
+                'text-sm py-1.5 font-medium hidden sm:flex border-b border-border-primary items-center space-x-3'
             )
         ">
         <Checkbox
             id="selectAll"
-            :checked="allSelected"
+            :checked="allSelected && selectedTimeEntries.length > 0"
             @update:checked="allSelected ? emit('unselectAll') : emit('selectAll')">
         </Checkbox>
-        <InputLabel
+        <FieldLabel
             v-if="selectedTimeEntries.length > 0"
             for="selectAll"
             class="select-none text-text-secondary">
             {{ selectedTimeEntries.length }} selected
-        </InputLabel>
-        <InputLabel v-else for="selectAll" class="text-text-secondary select-none"
-            >Select All</InputLabel
+        </FieldLabel>
+        <FieldLabel v-else for="selectAll" class="text-text-secondary select-none"
+            >Select All</FieldLabel
         >
         <button
             v-if="selectedTimeEntries.length"
@@ -100,13 +87,6 @@ const canMarkAsInvoiced = ['owner', 'administrator', 'manager'].includes(
             @click="showMassUpdateModal = true">
             <PencilSquareIcon class="w-4"></PencilSquareIcon>
             <span> Edit </span>
-        </button>
-        <button
-            v-if="selectedTimeEntries.length && canMarkAsInvoiced"
-            class="text-emerald-500 h-full px-2 space-x-1 items-center flex hover:text-emerald-600 transition focus-visible:ring-2 outline-0 focus-visible:text-emerald-600 focus-visible:ring-ring rounded"
-            @click="markAsInvoiced">
-            <DocumentTextIcon class="w-4"></DocumentTextIcon>
-            <span> Mark as invoiced </span>
         </button>
         <button
             v-if="selectedTimeEntries.length"
