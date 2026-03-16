@@ -88,7 +88,8 @@ const filteredProjects = computed(() => {
         if (searchQuery.value.trim()) {
             const query = searchQuery.value.toLowerCase().trim();
             const projectMatches = project.name.toLowerCase().includes(query);
-            const clientName = clients.value.find((client) => client.id === project.client_id)?.name ?? '';
+            const clientName =
+                clients.value.find((client) => client.id === project.client_id)?.name ?? '';
             const clientMatches = clientName.toLowerCase().includes(query);
 
             if (!projectMatches && !clientMatches) {
@@ -135,7 +136,8 @@ const showBillableRate = computed(() => {
             </div>
             <div class="flex items-center space-x-3">
                 <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div
+                        class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
                     </div>
                     <input

@@ -82,7 +82,7 @@ class ClientEndpointTest extends ApiEndpointTestAbstract
         $clients = Client::query()
             ->whereBelongsTo($data->organization, 'organization')
             ->visibleByEmployee($data->user)
-            ->orderBy('name')
+            ->orderBy('created_at', 'desc')
             ->get();
         $response->assertJson(fn (AssertableJson $json) => $json
             ->has('data')
