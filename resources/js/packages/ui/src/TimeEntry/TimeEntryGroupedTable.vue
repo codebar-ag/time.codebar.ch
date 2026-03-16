@@ -29,7 +29,7 @@ const props = defineProps<{
     createTag: (name: string) => Promise<Tag | undefined>;
     updateTimeEntry: (entry: TimeEntry) => void;
     updateTimeEntries: (ids: string[], changes: Partial<TimeEntry>) => void;
-    deleteTimeEntries: (entries: TimeEntry[]) => void;
+    deleteTimeEntries: (entries: TimeEntry[]) => Promise<void>;
     createTimeEntry: (entry: Omit<CreateTimeEntryBody, 'member_id'>) => void;
     createProject: (project: CreateProjectBody) => Promise<Project | undefined>;
     createClient: (client: CreateClientBody) => Promise<Client | undefined>;
@@ -197,7 +197,7 @@ function unselectAllTimeEntries(value: TimeEntriesGroupedByType[]) {
                     :create-tag
                     :update-time-entry
                     :on-start-stop-click="() => startTimeEntryFromExisting(entry)"
-                    :delete-time-entry="() => deleteTimeEntries([entry])"
+                    :delete-time-entry="async () => await deleteTimeEntries([entry])"
                     :duplicate-time-entry="() => createTimeEntry(entry)"
                     :currency="currency"
                     :time-entry="entry.timeEntries[0]!"

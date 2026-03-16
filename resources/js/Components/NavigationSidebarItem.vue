@@ -11,6 +11,7 @@ const props = defineProps<{
     current?: boolean;
     href: string;
     subItems?: { title: string; route: string; show: boolean }[];
+    count?: number | string;
 }>();
 
 const open = useSessionStorage('nav-collapse-state-' + props.title, true);
@@ -24,7 +25,8 @@ const open = useSessionStorage('nav-collapse-state-' + props.title, true);
             :title
             :icon
             :current
-            :href></NavigationSidebarLink>
+            :href
+            :count="props.count"></NavigationSidebarLink>
         <CollapsibleRoot v-else v-model:open="open"
             ><CollapsibleTrigger class="w-full group py-0.5">
                 <div

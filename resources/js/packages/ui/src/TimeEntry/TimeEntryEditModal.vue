@@ -126,7 +126,11 @@ async function deleteEntry() {
         deleting.value = true;
         try {
             await props.deleteTimeEntry(editableTimeEntry.value.id);
+            // Success - close modal and let the store handle success message
             show.value = false;
+        } catch {
+            // Error is already handled by handleApiRequestNotifications
+            // Don't close the modal on error
         } finally {
             deleting.value = false;
         }

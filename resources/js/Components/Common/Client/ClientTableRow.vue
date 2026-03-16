@@ -14,10 +14,6 @@ const props = defineProps<{
     client: Client;
 }>();
 
-function deleteClient() {
-    useClientsStore().deleteClient(props.client.id);
-}
-
 const projectCount = computed(() => {
     return projects.value.filter((projects) => projects.client_id === props.client.id).length;
 });
@@ -61,8 +57,7 @@ const showEditModal = ref(false);
             <ClientMoreOptionsDropdown
                 :client="client"
                 @edit="showEditModal = true"
-                @archive="archiveClient"
-                @delete="deleteClient"></ClientMoreOptionsDropdown>
+                @archive="archiveClient"></ClientMoreOptionsDropdown>
         </div>
     </TableRow>
 </template>

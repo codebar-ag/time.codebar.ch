@@ -25,7 +25,7 @@ class UpdateOrganization implements UpdatesTeamNames
      */
     public function update(User $user, Organization $organization, array $input): void
     {
-        Gate::forUser($user)->authorize('update', $organization);
+        Gate::forUser($user)->authorize('update', [$organization]);
 
         Validator::make($input, [
             'name' => [

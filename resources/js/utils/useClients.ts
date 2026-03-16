@@ -1,13 +1,37 @@
 import { defineStore } from 'pinia';
 import { api } from '@/packages/api/src';
-import type { CreateClientBody, Client, UpdateClientBody } from '@/packages/api/src';
+import { computed, ref } from 'vue';
+import type {
+    CreateClientBody,
+    ClientIndexResponse,
+    Client,
+    UpdateClientBody,
+} from '@/packages/api/src';
 import { getCurrentOrganizationId } from '@/utils/useUser';
 import { useNotificationsStore } from '@/utils/notification';
-import { useQueryClient } from '@tanstack/vue-query';
 
 export const useClientsStore = defineStore('clients', () => {
+    const clientResponse = ref<ClientIndexResponse | null>(null);
     const { handleApiRequestNotifications } = useNotificationsStore();
-    const queryClient = useQueryClient();
+
+    async function fetchClients() {
+        const organization = getCurrentOrganizationId();
+        if (organization) {
+            clientResponse.value = await handleApiRequestNotifications(
+                () =>
+                    api.getClients({
+                        queries: {
+                            archived: 'all',
+                        },
+                        params: {
+                            organization: organization,
+                        },
+                    }),
+                undefined,
+                'Failed to fetch clients'
+            );
+        }
+    }
 
     async function createClient(clientBody: CreateClientBody): Promise<Client | undefined> {
         const organization = getCurrentOrganizationId();
@@ -22,7 +46,7 @@ export const useClientsStore = defineStore('clients', () => {
                 'Client created successfully',
                 'Failed to create client'
             );
-            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            await fetchClients();
             return response?.data;
         }
     }
@@ -41,27 +65,15 @@ export const useClientsStore = defineStore('clients', () => {
                 'Client updated successfully',
                 'Failed to update client'
             );
-            queryClient.invalidateQueries({ queryKey: ['clients'] });
+            await fetchClients();
         }
     }
 
-    async function deleteClient(clientId: string) {
-        const organization = getCurrentOrganizationId();
-        if (organization) {
-            await handleApiRequestNotifications(
-                () =>
-                    api.deleteClient(undefined, {
-                        params: {
-                            organization: organization,
-                            client: clientId,
-                        },
-                    }),
-                'Client deleted successfully',
-                'Failed to delete client'
-            );
-            queryClient.invalidateQueries({ queryKey: ['clients'] });
-        }
-    }
+    // Delete disabled intentionally
 
-    return { createClient, deleteClient, updateClient };
+    const clients = computed<Client[]>(() => {
+        return clientResponse.value?.data || [];
+    });
+
+    return { clients, fetchClients, createClient, updateClient };
 });

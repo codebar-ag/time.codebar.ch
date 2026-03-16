@@ -35,6 +35,7 @@ yarn-error.log
 /_ide_helper.php
 /.phpstorm.meta.php
 /.rnd
+.npm-cache/*
 
 /caddy
 /frankenphp

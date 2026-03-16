@@ -32,10 +32,6 @@ const projectTasksCount = computed(() => {
     return tasks.value.filter((task) => task.project_id === props.project.id).length;
 });
 
-function deleteProject() {
-    useProjectsStore().deleteProject(props.project.id);
-}
-
 function archiveProject() {
     useProjectsStore().updateProject(props.project.id, {
         ...props.project,
@@ -130,8 +126,7 @@ const showEditProjectModal = ref(false);
             <ProjectMoreOptionsDropdown
                 :project="project"
                 @edit="showEditProjectModal = true"
-                @archive="archiveProject"
-                @delete="deleteProject"></ProjectMoreOptionsDropdown>
+                @archive="archiveProject"></ProjectMoreOptionsDropdown>
         </div>
     </TableRow>
 </template>
