@@ -245,16 +245,16 @@ Numbers are: [insertions] [deletions] [path]
 ### High-Level Notes by Category
 - **Repo hygiene:** Issue/PR templates removed; internal `INTERNAL_CHANGES_GUIDE.md` added; several project policy docs removed.
 - **CI:** Multiple GitHub workflows adjusted; some workflows removed; minor 1-line tweaks in remaining workflows.
-- **Backend:** Small changes in `ClientController`, `ProjectController`, and `ShareInertiaData` middleware; minor DB config tweak; Composer dependencies updated.
+- **Backend:** Client/Project API delete flows are enabled, original guard behavior is restored, and default index ordering matches pre-disable behavior; DB read/write host split remains in place.
 - **Docker:** Local and production Docker files removed (compose, Dockerfiles, configs, scripts).
-- **Frontend:** Multiple Vue components updated across Clients/Projects tables, dropdowns, and pages; navigation and layout tweaks; utility hooks adjusted.
+- **Frontend:** Clients/Projects search is restored, delete actions are available again from row menus, and table heading/status/billable-rate UI behavior is restored.
 - **Tests:** e2e tests (`clients.spec.ts`, `projects.spec.ts`) updated.
 
 ### API Behavior Changes (Upgrade Notes)
-- Clients API: `GET /api/v1/organizations/{org}/clients` now returns clients ordered by `name` ascending (was `created_at` desc). If you rely on ordering, update your consumers accordingly.
-- Projects API: `GET /api/v1/organizations/{org}/projects` now returns projects ordered by `name` ascending (was `created_at`-based ordering in some flows). If you relied on creation-time ordering, sort client-side or use a dedicated query param in future versions.
-- Clients API: `DELETE /api/v1/organizations/{org}/clients/{client}` is disabled. It now returns `200` with `{ message: "Client deletion disabled" }` and does not delete data.
-- Projects API: `DELETE /api/v1/organizations/{org}/projects/{project}` is disabled. It now returns `200` with `{ message: "Project deletion disabled" }` and does not delete data.
+- Clients API: `GET /api/v1/organizations/{org}/clients` default ordering is `created_at` descending.
+- Projects API: `GET /api/v1/organizations/{org}/projects` keeps creation-time-first ordering semantics (`created_at` descending in the index result).
+- Clients API: `DELETE /api/v1/organizations/{org}/clients/{client}` is enabled. It returns `400` when the client is still in use by projects; otherwise it deletes and returns `204`.
+- Projects API: `DELETE /api/v1/organizations/{org}/projects/{project}` is enabled. It returns `400` when still in use by tasks/time entries; otherwise it deletes related project members and returns `204`.
 
 ### Step-by-Step Protocol (detailed)
 1) Clean and position on base (or desired) revision.

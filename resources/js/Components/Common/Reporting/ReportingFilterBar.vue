@@ -2,6 +2,7 @@
 import { CheckCircleIcon, TagIcon, UserGroupIcon } from '@heroicons/vue/20/solid';
 import { FolderIcon } from '@heroicons/vue/16/solid';
 import BillableIcon from '@/packages/ui/src/Icons/BillableIcon.vue';
+import InvoiceStatusIcon from '@/packages/ui/src/Icons/InvoiceStatusIcon.vue';
 import ReportingRoundingControls from '@/Components/Common/Reporting/ReportingRoundingControls.vue';
 import TaskMultiselectDropdown from '@/Components/Common/Task/TaskMultiselectDropdown.vue';
 import ClientMultiselectDropdown from '@/Components/Common/Client/ClientMultiselectDropdown.vue';
@@ -29,6 +30,7 @@ const selectedTasks = defineModel<string[]>('selectedTasks', { required: true })
 const selectedClients = defineModel<string[]>('selectedClients', { required: true });
 const selectedTags = defineModel<string[]>('selectedTags', { required: true });
 const billable = defineModel<'true' | 'false' | null>('billable', { required: true });
+const invoiced = defineModel<'true' | 'false' | null>('invoiced', { default: null });
 const roundingEnabled = defineModel<boolean>('roundingEnabled', { required: true });
 const roundingType = defineModel<TimeEntryRoundingType>('roundingType', { required: true });
 const roundingMinutes = defineModel<number>('roundingMinutes', { required: true });
@@ -124,6 +126,32 @@ async function createTag(name: string) {
                         <SelectItem :value="null">Both</SelectItem>
                         <SelectItem value="true">Billable</SelectItem>
                         <SelectItem value="false">Non Billable</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Select v-model="invoiced" @update:model-value="emit('submit')">
+                    <SelectTrigger
+                        size="sm"
+                        variant="outline"
+                        :active="invoiced !== null"
+                        :show-chevron="false">
+                        <SelectValue class="flex items-center gap-2">
+                            <InvoiceStatusIcon
+                                size="small"
+                                :invoiced="invoiced === 'true'"
+                                :class="
+                                    invoiced !== null
+                                        ? 'dark:text-accent-300/80 text-accent-400/80'
+                                        : 'text-text-quaternary'
+                                " />
+                            <span class="text-text-secondary">{{
+                                invoiced === 'false' ? 'Not Invoiced' : 'Invoiced'
+                            }}</span>
+                        </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem :value="null">Both</SelectItem>
+                        <SelectItem value="true">Invoiced</SelectItem>
+                        <SelectItem value="false">Not Invoiced</SelectItem>
                     </SelectContent>
                 </Select>
                 <ReportingRoundingControls

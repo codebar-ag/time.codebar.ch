@@ -2,6 +2,7 @@
 import MainContainer from '@/packages/ui/src/MainContainer.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { PlusIcon } from '@heroicons/vue/16/solid';
+import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import { UserCircleIcon } from '@heroicons/vue/20/solid';
 import { computed, ref } from 'vue';
@@ -20,6 +21,7 @@ const { clients } = useClientsQuery();
 const activeTab = ref<'active' | 'archived'>('active');
 
 const createClient = ref(false);
+const searchQuery = ref('');
 
 interface ClientTableState {
     sortColumn: SortColumn;
@@ -44,9 +46,14 @@ function handleSort(column: SortColumn, direction: SortDirection) {
 const shownClients = computed(() => {
     return clients.value.filter((client) => {
         if (activeTab.value === 'active') {
-            return !client.is_archived;
+            if (client.is_archived) return false;
+        } else if (!client.is_archived) {
+            return false;
         }
-        return client.is_archived;
+
+        if (!searchQuery.value.trim()) return true;
+
+        return client.name.toLowerCase().includes(searchQuery.value.toLowerCase().trim());
     });
 });
 </script>
@@ -62,9 +69,21 @@ const shownClients = computed(() => {
                     <TabBarItem value="archived"> Archived </TabBarItem>
                 </TabBar>
             </div>
-            <SecondaryButton v-if="canCreateClients()" :icon="PlusIcon" @click="createClient = true"
-                >Create Client</SecondaryButton
-            >
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
+                    </div>
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Search clients..."
+                        class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm" />
+                </div>
+                <SecondaryButton v-if="canCreateClients()" :icon="PlusIcon" @click="createClient = true"
+                    >Create Client</SecondaryButton
+                >
+            </div>
             <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
         </MainContainer>
         <ClientTable

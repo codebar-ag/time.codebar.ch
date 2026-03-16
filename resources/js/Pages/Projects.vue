@@ -2,6 +2,7 @@
 import MainContainer from '@/packages/ui/src/MainContainer.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { FolderIcon, PlusIcon } from '@heroicons/vue/20/solid';
+import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import ProjectTable from '@/Components/Common/Project/ProjectTable.vue';
 import { computed } from 'vue';
@@ -53,6 +54,8 @@ const tableState = useStorage<ProjectTableState>(
     { mergeDefaults: true }
 );
 
+const searchQuery = useStorage('project-search-query', '');
+
 function handleSort(column: SortColumn, direction: SortDirection) {
     tableState.value.sortColumn = column;
     tableState.value.sortDirection = direction;
@@ -78,6 +81,17 @@ const filteredProjects = computed(() => {
                 project.client_id && tableState.value.filters.clientIds.includes(project.client_id);
 
             if (!matchesNoClient && !matchesClientId) {
+                return false;
+            }
+        }
+
+        if (searchQuery.value.trim()) {
+            const query = searchQuery.value.toLowerCase().trim();
+            const projectMatches = project.name.toLowerCase().includes(query);
+            const clientName = clients.value.find((client) => client.id === project.client_id)?.name ?? '';
+            const clientMatches = clientName.toLowerCase().includes(query);
+
+            if (!projectMatches && !clientMatches) {
                 return false;
             }
         }
@@ -119,12 +133,24 @@ const showBillableRate = computed(() => {
             <div class="flex items-center space-x-3 sm:space-x-6">
                 <PageTitle :icon="FolderIcon" title="Projects"></PageTitle>
             </div>
-            <SecondaryButton
-                v-if="canCreateProjects()"
-                :icon="PlusIcon"
-                @click="showCreateProjectModal = true"
-                >Create Project
-            </SecondaryButton>
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <MagnifyingGlassIcon class="h-5 w-5 text-text-secondary" />
+                    </div>
+                    <input
+                        v-model="searchQuery"
+                        type="text"
+                        placeholder="Search projects or clients..."
+                        class="block w-64 pl-10 pr-3 py-2 border border-input-border rounded-md leading-5 bg-input-background text-text-primary placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-500 focus:border-accent-500 sm:text-sm" />
+                </div>
+                <SecondaryButton
+                    v-if="canCreateProjects()"
+                    :icon="PlusIcon"
+                    @click="showCreateProjectModal = true"
+                    >Create Project
+                </SecondaryButton>
+            </div>
             <ProjectCreateModal
                 v-model:show="showCreateProjectModal"
                 :create-project

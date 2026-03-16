@@ -43,7 +43,7 @@ class ClientController extends Controller
 
         $clientsQuery = Client::query()
             ->whereBelongsTo($organization, 'organization')
-            ->orderBy('name');
+            ->orderBy('created_at', 'desc');
 
         if (! $canViewAllClients) {
             $clientsQuery->visibleByEmployee($user);
@@ -111,7 +111,12 @@ class ClientController extends Controller
     {
         $this->checkPermission($organization, 'clients:delete', $client);
 
-        // Deletion disabled: return early to keep data intact
-        return response()->json(['message' => 'Client deletion disabled'], 200);
+        if ($client->projects()->exists()) {
+            throw new EntityStillInUseApiException('client', 'project');
+        }
+
+        $client->delete();
+
+        return response()->json(null, 204);
     }
 }

@@ -69,6 +69,7 @@ const selectedTasks = ref<string[]>([]);
 const selectedClients = ref<string[]>([]);
 
 const billable = ref<'true' | 'false' | null>(null);
+const invoiced = ref<'true' | 'false' | null>(null);
 const roundingEnabled = ref<boolean>(false);
 const roundingType = ref<TimeEntryRoundingType>('nearest');
 const roundingMinutes = ref<number>(15);
@@ -123,6 +124,7 @@ const filterParams = computed<AggregatedTimeEntriesQueryParams>(() => {
         client_ids: selectedClients.value.length > 0 ? selectedClients.value : undefined,
         tag_ids: selectedTags.value.length > 0 ? selectedTags.value : undefined,
         billable: billable.value !== null ? billable.value : undefined,
+        invoiced: invoiced.value !== null ? invoiced.value : undefined,
         member_id: getCurrentRole() === 'employee' ? getCurrentMembershipId() : undefined,
         rounding_type: roundingEnabled.value ? roundingType.value : undefined,
         rounding_minutes: roundingEnabled.value ? roundingMinutes.value : undefined,
@@ -367,6 +369,7 @@ const tableData = computed(() => {
         v-model:selected-clients="selectedClients"
         v-model:selected-tags="selectedTags"
         v-model:billable="billable"
+        v-model:invoiced="invoiced"
         v-model:rounding-enabled="roundingEnabled"
         v-model:rounding-type="roundingType"
         v-model:rounding-minutes="roundingMinutes"

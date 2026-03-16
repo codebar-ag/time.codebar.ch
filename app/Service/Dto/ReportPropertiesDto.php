@@ -107,8 +107,8 @@ class ReportPropertiesDto implements Castable
                     }
                 }
                 $dto = new ReportPropertiesDto;
-                $dto->end = $data->end !== null ? Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $data->end) : null;
-                $dto->start = $data->start !== null ? Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $data->start) : null;
+                $dto->end = $data->end !== null ? Carbon::parse($data->end, 'UTC') : null;
+                $dto->start = $data->start !== null ? Carbon::parse($data->start, 'UTC') : null;
                 $dto->active = $data->active;
                 $dto->memberIds = $data->memberIds !== null ? ReportPropertiesDto::idArrayToCollection($data->memberIds) : null;
                 $dto->billable = $data->billable;
