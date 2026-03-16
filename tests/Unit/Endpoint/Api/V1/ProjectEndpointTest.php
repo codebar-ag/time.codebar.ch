@@ -211,10 +211,10 @@ class ProjectEndpointTest extends ApiEndpointTestAbstract
             ->has('data')
             ->has('links')
             ->has('meta')
-            ->where('data.0.billable_rate', 112)
-            ->where('data.1.billable_rate', 112)
-            ->where('data.2.billable_rate', 113)
-            ->where('data.3.billable_rate', 113)
+            ->where('data.0.billable_rate', 113)
+            ->where('data.1.billable_rate', 113)
+            ->where('data.2.billable_rate', 112)
+            ->where('data.3.billable_rate', 112)
         );
     }
 
