@@ -5,44 +5,56 @@ import { PlusIcon } from '@heroicons/vue/16/solid';
 import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 import SecondaryButton from '@/packages/ui/src/Buttons/SecondaryButton.vue';
 import { UserCircleIcon } from '@heroicons/vue/20/solid';
-import { computed, onMounted, ref } from 'vue';
-import type { Client } from '@/packages/api/src';
-import { useClientsStore } from '@/utils/useClients';
+import { computed, ref } from 'vue';
+import { useClientsQuery } from '@/utils/useClientsQuery';
 import ClientTable from '@/Components/Common/Client/ClientTable.vue';
 import ClientCreateModal from '@/Components/Common/Client/ClientCreateModal.vue';
 import PageTitle from '@/Components/Common/PageTitle.vue';
 import { canCreateClients } from '@/utils/permissions';
 import TabBarItem from '@/Components/Common/TabBar/TabBarItem.vue';
 import TabBar from '@/Components/Common/TabBar/TabBar.vue';
-import { storeToRefs } from 'pinia';
+import { useStorage } from '@vueuse/core';
+import type { SortColumn, SortDirection } from '@/Components/Common/Client/ClientTable.vue';
 
-onMounted(() => {
-    useClientsStore().fetchClients();
-});
+const { clients } = useClientsQuery();
 
 const activeTab = ref<'active' | 'archived'>('active');
 
 const createClient = ref(false);
-
-const { clients } = storeToRefs(useClientsStore());
 const searchQuery = ref('');
 
+interface ClientTableState {
+    sortColumn: SortColumn;
+    sortDirection: SortDirection;
+}
+
+const tableState = useStorage<ClientTableState>(
+    'client-table-state',
+    {
+        sortColumn: 'name',
+        sortDirection: 'asc',
+    },
+    undefined,
+    { mergeDefaults: true }
+);
+
+function handleSort(column: SortColumn, direction: SortDirection) {
+    tableState.value.sortColumn = column;
+    tableState.value.sortDirection = direction;
+}
+
 const shownClients = computed(() => {
-    let filteredClients = clients.value.filter((client: Client) => {
+    return clients.value.filter((client) => {
         if (activeTab.value === 'active') {
-            return !client.is_archived;
+            if (client.is_archived) return false;
+        } else if (!client.is_archived) {
+            return false;
         }
-        return client.is_archived;
+
+        if (!searchQuery.value.trim()) return true;
+
+        return client.name.toLowerCase().includes(searchQuery.value.toLowerCase().trim());
     });
-
-    if (searchQuery.value.trim()) {
-        const query = searchQuery.value.toLowerCase().trim();
-        filteredClients = filteredClients.filter((client: Client) => {
-            return client.name.toLowerCase().includes(query);
-        });
-    }
-
-    return filteredClients;
 });
 </script>
 
@@ -78,6 +90,10 @@ const shownClients = computed(() => {
             </div>
             <ClientCreateModal v-model:show="createClient"></ClientCreateModal>
         </MainContainer>
-        <ClientTable :clients="shownClients"></ClientTable>
+        <ClientTable
+            :clients="shownClients"
+            :sort-column="tableState.sortColumn"
+            :sort-direction="tableState.sortDirection"
+            @sort="handleSort"></ClientTable>
     </AppLayout>
 </template>

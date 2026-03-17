@@ -10,6 +10,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Service\PermissionStore as AppPermissionStore;
 use Closure;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Session;
@@ -99,7 +100,7 @@ class ShareInertiaData
                                     ->whereBelongsTo($organization, 'organization')
                                     ->whereNull('archived_at')
                                     ->whereHas('projects', function ($query) use ($organization, $user, $canViewAllProjects): void {
-                                        /** @var \Illuminate\Database\Eloquent\Builder<Project> $query */
+                                        /** @var Builder<Project> $query */
                                         $query->whereBelongsTo($organization, 'organization')
                                             ->whereNull('archived_at');
                                         if (! $canViewAllProjects) {

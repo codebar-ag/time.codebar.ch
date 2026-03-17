@@ -69,11 +69,27 @@ export const useClientsStore = defineStore('clients', () => {
         }
     }
 
-    // Delete disabled intentionally
+    async function deleteClient(clientId: string) {
+        const organization = getCurrentOrganizationId();
+        if (organization) {
+            await handleApiRequestNotifications(
+                () =>
+                    api.deleteClient(undefined, {
+                        params: {
+                            organization: organization,
+                            client: clientId,
+                        },
+                    }),
+                'Client deleted successfully',
+                'Failed to delete client'
+            );
+            await fetchClients();
+        }
+    }
 
     const clients = computed<Client[]>(() => {
         return clientResponse.value?.data || [];
     });
 
-    return { clients, fetchClients, createClient, updateClient };
+    return { clients, fetchClients, createClient, deleteClient, updateClient };
 });

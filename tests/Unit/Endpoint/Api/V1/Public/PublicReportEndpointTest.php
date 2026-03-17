@@ -16,6 +16,8 @@ use App\Models\Task;
 use App\Models\TimeEntry;
 use App\Service\CurrencyService;
 use App\Service\Dto\ReportPropertiesDto;
+use App\Service\TimeEntryFilter;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Tests\Unit\Endpoint\Api\V1\ApiEndpointTestAbstract;
 
@@ -79,148 +81,155 @@ class PublicReportEndpointTest extends ApiEndpointTestAbstract
 
     public function test_show_returns_detailed_information_about_the_report(): void
     {
-        // Arrange
-        $timezone = 'Europe/Vienna';
-        $reportDto = new ReportPropertiesDto;
-        $organization = Organization::factory()->create();
-        $reportDto->start = now()->subDays(2);
-        $reportDto->end = now();
-        $reportDto->group = TimeEntryAggregationType::Project;
-        $reportDto->subGroup = TimeEntryAggregationType::Task;
-        $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
-        $reportDto->weekStart = Weekday::Monday;
-        $reportDto->timezone = $timezone;
-        $report = Report::factory()->forOrganization($organization)->public()->create([
-            'public_until' => null,
-            'properties' => $reportDto,
-        ]);
-        $project = Project::factory()->forOrganization($organization)->create();
-        $task1 = Task::factory()->forOrganization($organization)->forProject($project)->create([
-            'id' => '1b0f1b32-0def-4932-8829-b68f52161987',
-        ]);
-        $task2 = Task::factory()->forOrganization($organization)->forProject($project)->create([
-            'id' => '3c54796d-5ab4-41e1-8f30-aa61a0a919ae',
-        ]);
-        TimeEntry::factory()->forOrganization($organization)->forTask($task1)->startWithDuration(now()->subDay(), 100)->create();
-        TimeEntry::factory()->forOrganization($organization)->forTask($task2)->startWithDuration(now()->subDay(), 100)->create();
-        TimeEntry::factory()->forOrganization($organization)->startWithDuration(now()->subDay(), 100)->create();
+        $frozenNow = Carbon::parse('2026-03-16T16:10:08Z', 'UTC');
+        Carbon::setTestNow($frozenNow);
 
-        $currencyService = app(CurrencyService::class);
+        try {
+            // Arrange
+            $timezone = 'Europe/Vienna';
+            $reportDto = new ReportPropertiesDto;
+            $organization = Organization::factory()->create();
+            $reportDto->start = now()->subDays(2);
+            $reportDto->end = now();
+            $reportDto->group = TimeEntryAggregationType::Project;
+            $reportDto->subGroup = TimeEntryAggregationType::Task;
+            $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
+            $reportDto->weekStart = Weekday::Monday;
+            $reportDto->timezone = $timezone;
+            $report = Report::factory()->forOrganization($organization)->public()->create([
+                'public_until' => null,
+                'properties' => $reportDto,
+            ]);
+            $project = Project::factory()->forOrganization($organization)->create();
+            $task1 = Task::factory()->forOrganization($organization)->forProject($project)->create([
+                'id' => '1b0f1b32-0def-4932-8829-b68f52161987',
+            ]);
+            $task2 = Task::factory()->forOrganization($organization)->forProject($project)->create([
+                'id' => '3c54796d-5ab4-41e1-8f30-aa61a0a919ae',
+            ]);
+            TimeEntry::factory()->forOrganization($organization)->forTask($task1)->startWithDuration(now()->subDay(), 100)->create();
+            TimeEntry::factory()->forOrganization($organization)->forTask($task2)->startWithDuration(now()->subDay(), 100)->create();
+            TimeEntry::factory()->forOrganization($organization)->startWithDuration(now()->subDay(), 100)->create();
 
-        // Act
-        $response = $this->getJson(route('api.v1.public.reports.show'), [
-            'X-Api-Key' => $report->share_secret,
-        ]);
+            $currencyService = app(CurrencyService::class);
 
-        // Assert
-        $response->assertOk();
-        $response->assertExactJson([
-            'name' => $report->name,
-            'description' => $report->description,
-            'public_until' => $report->public_until?->toIso8601ZuluString(),
-            'currency' => $organization->currency,
-            'number_format' => $organization->number_format,
-            'interval_format' => $organization->interval_format,
-            'currency_format' => $organization->currency_format,
-            'currency_symbol' => $currencyService->getCurrencySymbol($organization->currency),
-            'time_format' => $organization->time_format,
-            'date_format' => $organization->date_format,
-            'properties' => [
-                'group' => $reportDto->group->value,
-                'sub_group' => $reportDto->subGroup->value,
-                'history_group' => $reportDto->historyGroup->value,
-                'start' => $reportDto->start->toIso8601ZuluString(),
-                'end' => $reportDto->end->toIso8601ZuluString(),
-            ],
-            'data' => [
-                'seconds' => 300,
-                'cost' => 0,
-                'grouped_type' => TimeEntryAggregationType::Project->value,
-                'grouped_data' => [
-                    [
-                        'key' => $project->id,
-                        'seconds' => 200,
-                        'cost' => 0,
-                        'grouped_type' => TimeEntryAggregationType::Task->value,
-                        'grouped_data' => [
-                            [
-                                'key' => $task1->id,
-                                'seconds' => 100,
-                                'cost' => 0,
-                                'grouped_type' => null,
-                                'grouped_data' => null,
-                                'description' => $task1->name,
-                                'color' => null,
+            // Act
+            $response = $this->getJson(route('api.v1.public.reports.show'), [
+                'X-Api-Key' => $report->share_secret,
+            ]);
+
+            // Assert
+            $response->assertOk();
+            $response->assertExactJson([
+                'name' => $report->name,
+                'description' => $report->description,
+                'public_until' => $report->public_until?->toIso8601ZuluString(),
+                'currency' => $organization->currency,
+                'number_format' => $organization->number_format,
+                'interval_format' => $organization->interval_format,
+                'currency_format' => $organization->currency_format,
+                'currency_symbol' => $currencyService->getCurrencySymbol($organization->currency),
+                'time_format' => $organization->time_format,
+                'date_format' => $organization->date_format,
+                'properties' => [
+                    'group' => $reportDto->group->value,
+                    'sub_group' => $reportDto->subGroup->value,
+                    'history_group' => $reportDto->historyGroup->value,
+                    'start' => $reportDto->start->toIso8601ZuluString(),
+                    'end' => $reportDto->end->toIso8601ZuluString(),
+                ],
+                'data' => [
+                    'seconds' => 300,
+                    'cost' => 0,
+                    'grouped_type' => TimeEntryAggregationType::Project->value,
+                    'grouped_data' => [
+                        [
+                            'key' => $project->id,
+                            'seconds' => 200,
+                            'cost' => 0,
+                            'grouped_type' => TimeEntryAggregationType::Task->value,
+                            'grouped_data' => [
+                                [
+                                    'key' => $task1->id,
+                                    'seconds' => 100,
+                                    'cost' => 0,
+                                    'grouped_type' => null,
+                                    'grouped_data' => null,
+                                    'description' => $task1->name,
+                                    'color' => null,
+                                ],
+                                [
+                                    'key' => $task2->id,
+                                    'seconds' => 100,
+                                    'cost' => 0,
+                                    'grouped_type' => null,
+                                    'grouped_data' => null,
+                                    'description' => $task2->name,
+                                    'color' => null,
+                                ],
                             ],
-                            [
-                                'key' => $task2->id,
-                                'seconds' => 100,
-                                'cost' => 0,
-                                'grouped_type' => null,
-                                'grouped_data' => null,
-                                'description' => $task2->name,
-                                'color' => null,
-                            ],
+                            'description' => $project->name,
+                            'color' => $project->color,
                         ],
-                        'description' => $project->name,
-                        'color' => $project->color,
-                    ],
-                    [
-                        'key' => null,
-                        'seconds' => 100,
-                        'cost' => 0,
-                        'grouped_type' => TimeEntryAggregationType::Task->value,
-                        'grouped_data' => [
-                            [
-                                'key' => null,
-                                'seconds' => 100,
-                                'cost' => 0,
-                                'grouped_type' => null,
-                                'grouped_data' => null,
-                                'description' => null,
-                                'color' => null,
+                        [
+                            'key' => null,
+                            'seconds' => 100,
+                            'cost' => 0,
+                            'grouped_type' => TimeEntryAggregationType::Task->value,
+                            'grouped_data' => [
+                                [
+                                    'key' => null,
+                                    'seconds' => 100,
+                                    'cost' => 0,
+                                    'grouped_type' => null,
+                                    'grouped_data' => null,
+                                    'description' => null,
+                                    'color' => null,
+                                ],
                             ],
+                            'description' => null,
+                            'color' => null,
                         ],
-                        'description' => null,
-                        'color' => null,
                     ],
                 ],
-            ],
-            'history_data' => [
-                'seconds' => 300,
-                'cost' => 0,
-                'grouped_type' => TimeEntryAggregationTypeInterval::Day->value,
-                'grouped_data' => [
-                    [
-                        'key' => now()->timezone($timezone)->subDays(2)->toDateString(),
-                        'seconds' => 0,
-                        'cost' => 0,
-                        'grouped_type' => null,
-                        'grouped_data' => null,
-                        'description' => null,
-                        'color' => null,
-                    ],
-                    [
-                        'key' => now()->timezone($timezone)->subDays(1)->toDateString(),
-                        'seconds' => 300,
-                        'cost' => 0,
-                        'grouped_type' => null,
-                        'grouped_data' => null,
-                        'description' => null,
-                        'color' => null,
-                    ],
-                    [
-                        'key' => now()->timezone($timezone)->toDateString(),
-                        'seconds' => 0,
-                        'cost' => 0,
-                        'grouped_type' => null,
-                        'grouped_data' => null,
-                        'description' => null,
-                        'color' => null,
+                'history_data' => [
+                    'seconds' => 300,
+                    'cost' => 0,
+                    'grouped_type' => TimeEntryAggregationTypeInterval::Day->value,
+                    'grouped_data' => [
+                        [
+                            'key' => now()->timezone($timezone)->subDays(2)->toDateString(),
+                            'seconds' => 0,
+                            'cost' => 0,
+                            'grouped_type' => null,
+                            'grouped_data' => null,
+                            'description' => null,
+                            'color' => null,
+                        ],
+                        [
+                            'key' => now()->timezone($timezone)->subDays(1)->toDateString(),
+                            'seconds' => 300,
+                            'cost' => 0,
+                            'grouped_type' => null,
+                            'grouped_data' => null,
+                            'description' => null,
+                            'color' => null,
+                        ],
+                        [
+                            'key' => now()->timezone($timezone)->toDateString(),
+                            'seconds' => 0,
+                            'cost' => 0,
+                            'grouped_type' => null,
+                            'grouped_data' => null,
+                            'description' => null,
+                            'color' => null,
+                        ],
                     ],
                 ],
-            ],
-        ]);
+            ]);
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_show_returns_detailed_information_about_the_report_with_not_expired_expiration_date(): void
@@ -420,6 +429,246 @@ class PublicReportEndpointTest extends ApiEndpointTestAbstract
                         'color' => null,
                     ],
                 ],
+            ],
+        ]);
+    }
+
+    public function test_show_returns_only_entries_without_project_when_none_project_filter_is_set(): void
+    {
+        // Arrange
+        $organization = Organization::factory()->create();
+        $project = Project::factory()->forOrganization($organization)->create();
+
+        // Entry with project (should be excluded)
+        TimeEntry::factory()->forOrganization($organization)
+            ->forProject($project)
+            ->startWithDuration(now()->subDay(), 100)
+            ->create();
+        // Entry without project (should be included)
+        TimeEntry::factory()->forOrganization($organization)
+            ->startWithDuration(now()->subDay(), 200)
+            ->create();
+
+        $reportDto = new ReportPropertiesDto;
+        $reportDto->start = now()->subDays(2);
+        $reportDto->end = now();
+        $reportDto->group = TimeEntryAggregationType::Project;
+        $reportDto->subGroup = TimeEntryAggregationType::Task;
+        $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
+        $reportDto->weekStart = Weekday::Monday;
+        $reportDto->timezone = 'Europe/Vienna';
+        $reportDto->setProjectIds([TimeEntryFilter::NONE_VALUE]);
+        $report = Report::factory()->forOrganization($organization)->public()->create([
+            'public_until' => null,
+            'properties' => $reportDto,
+        ]);
+
+        // Act
+        $response = $this->getJson(route('api.v1.public.reports.show'), [
+            'X-Api-Key' => $report->share_secret,
+        ]);
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'seconds' => 200,
+                'cost' => 0,
+                'grouped_type' => TimeEntryAggregationType::Project->value,
+            ],
+        ]);
+    }
+
+    public function test_show_returns_entries_with_and_without_project_when_none_and_real_id_combined(): void
+    {
+        // Arrange
+        $organization = Organization::factory()->create();
+        $projectA = Project::factory()->forOrganization($organization)->create();
+        $projectB = Project::factory()->forOrganization($organization)->create();
+
+        // Entry with project A (should be included)
+        TimeEntry::factory()->forOrganization($organization)
+            ->forProject($projectA)
+            ->startWithDuration(now()->subDay(), 100)
+            ->create();
+        // Entry with project B (should be excluded)
+        TimeEntry::factory()->forOrganization($organization)
+            ->forProject($projectB)
+            ->startWithDuration(now()->subDay(), 100)
+            ->create();
+        // Entry without project (should be included)
+        TimeEntry::factory()->forOrganization($organization)
+            ->startWithDuration(now()->subDay(), 200)
+            ->create();
+
+        $reportDto = new ReportPropertiesDto;
+        $reportDto->start = now()->subDays(2);
+        $reportDto->end = now();
+        $reportDto->group = TimeEntryAggregationType::Project;
+        $reportDto->subGroup = TimeEntryAggregationType::Task;
+        $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
+        $reportDto->weekStart = Weekday::Monday;
+        $reportDto->timezone = 'Europe/Vienna';
+        $reportDto->setProjectIds([$projectA->getKey(), TimeEntryFilter::NONE_VALUE]);
+        $report = Report::factory()->forOrganization($organization)->public()->create([
+            'public_until' => null,
+            'properties' => $reportDto,
+        ]);
+
+        // Act
+        $response = $this->getJson(route('api.v1.public.reports.show'), [
+            'X-Api-Key' => $report->share_secret,
+        ]);
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'seconds' => 300,
+                'cost' => 0,
+                'grouped_type' => TimeEntryAggregationType::Project->value,
+            ],
+        ]);
+    }
+
+    public function test_show_returns_only_entries_without_task_when_none_task_filter_is_set(): void
+    {
+        // Arrange
+        $organization = Organization::factory()->create();
+        $project = Project::factory()->forOrganization($organization)->create();
+        $task = Task::factory()->forOrganization($organization)->forProject($project)->create();
+
+        // Entry with task (should be excluded)
+        TimeEntry::factory()->forOrganization($organization)
+            ->forTask($task)
+            ->startWithDuration(now()->subDay(), 100)
+            ->create();
+        // Entry without task (should be included)
+        TimeEntry::factory()->forOrganization($organization)
+            ->forProject($project)
+            ->startWithDuration(now()->subDay(), 200)
+            ->create();
+
+        $reportDto = new ReportPropertiesDto;
+        $reportDto->start = now()->subDays(2);
+        $reportDto->end = now();
+        $reportDto->group = TimeEntryAggregationType::Project;
+        $reportDto->subGroup = TimeEntryAggregationType::Task;
+        $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
+        $reportDto->weekStart = Weekday::Monday;
+        $reportDto->timezone = 'Europe/Vienna';
+        $reportDto->setTaskIds([TimeEntryFilter::NONE_VALUE]);
+        $report = Report::factory()->forOrganization($organization)->public()->create([
+            'public_until' => null,
+            'properties' => $reportDto,
+        ]);
+
+        // Act
+        $response = $this->getJson(route('api.v1.public.reports.show'), [
+            'X-Api-Key' => $report->share_secret,
+        ]);
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'seconds' => 200,
+                'cost' => 0,
+                'grouped_type' => TimeEntryAggregationType::Project->value,
+            ],
+        ]);
+    }
+
+    public function test_show_returns_only_entries_without_client_when_none_client_filter_is_set(): void
+    {
+        // Arrange
+        $organization = Organization::factory()->create();
+        $client = Client::factory()->forOrganization($organization)->create();
+        $projectWithClient = Project::factory()->forClient($client)->forOrganization($organization)->create();
+
+        // Entry with client (should be excluded)
+        TimeEntry::factory()->forOrganization($organization)
+            ->forProject($projectWithClient)
+            ->startWithDuration(now()->subDay(), 100)
+            ->create();
+        // Entry without client (should be included)
+        TimeEntry::factory()->forOrganization($organization)
+            ->startWithDuration(now()->subDay(), 200)
+            ->create();
+
+        $reportDto = new ReportPropertiesDto;
+        $reportDto->start = now()->subDays(2);
+        $reportDto->end = now();
+        $reportDto->group = TimeEntryAggregationType::Project;
+        $reportDto->subGroup = TimeEntryAggregationType::Task;
+        $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
+        $reportDto->weekStart = Weekday::Monday;
+        $reportDto->timezone = 'Europe/Vienna';
+        $reportDto->setClientIds([TimeEntryFilter::NONE_VALUE]);
+        $report = Report::factory()->forOrganization($organization)->public()->create([
+            'public_until' => null,
+            'properties' => $reportDto,
+        ]);
+
+        // Act
+        $response = $this->getJson(route('api.v1.public.reports.show'), [
+            'X-Api-Key' => $report->share_secret,
+        ]);
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'seconds' => 200,
+                'cost' => 0,
+                'grouped_type' => TimeEntryAggregationType::Project->value,
+            ],
+        ]);
+    }
+
+    public function test_show_returns_only_entries_without_tags_when_none_tag_filter_is_set(): void
+    {
+        // Arrange
+        $organization = Organization::factory()->create();
+        $tag = Tag::factory()->forOrganization($organization)->create();
+
+        // Entry with tag (should be excluded)
+        TimeEntry::factory()->forOrganization($organization)
+            ->startWithDuration(now()->subDay(), 100)
+            ->create([
+                'tags' => [$tag->getKey()],
+            ]);
+        // Entry without tags (should be included)
+        TimeEntry::factory()->forOrganization($organization)
+            ->startWithDuration(now()->subDay(), 200)
+            ->create();
+
+        $reportDto = new ReportPropertiesDto;
+        $reportDto->start = now()->subDays(2);
+        $reportDto->end = now();
+        $reportDto->group = TimeEntryAggregationType::Project;
+        $reportDto->subGroup = TimeEntryAggregationType::Task;
+        $reportDto->historyGroup = TimeEntryAggregationTypeInterval::Day;
+        $reportDto->weekStart = Weekday::Monday;
+        $reportDto->timezone = 'Europe/Vienna';
+        $reportDto->setTagIds([TimeEntryFilter::NONE_VALUE]);
+        $report = Report::factory()->forOrganization($organization)->public()->create([
+            'public_until' => null,
+            'properties' => $reportDto,
+        ]);
+
+        // Act
+        $response = $this->getJson(route('api.v1.public.reports.show'), [
+            'X-Api-Key' => $report->share_secret,
+        ]);
+
+        // Assert
+        $response->assertOk();
+        $response->assertJson([
+            'data' => [
+                'seconds' => 200,
+                'cost' => 0,
+                'grouped_type' => TimeEntryAggregationType::Project->value,
             ],
         ]);
     }

@@ -26,19 +26,46 @@ import TimeTrackerRunningInDifferentOrganizationOverlay from './TimeTracker/Time
 import TimeTrackerControls from './TimeTracker/TimeTrackerControls.vue';
 import TimeTrackerMoreOptionsDropdown from './TimeTracker/TimeTrackerMoreOptionsDropdown.vue';
 import CardTitle from './CardTitle.vue';
-import SelectDropdown from './Input/SelectDropdown.vue';
 import Badge from './Badge.vue';
 import Checkbox from './Input/Checkbox.vue';
 import TimeEntryGroupedTable from './TimeEntry/TimeEntryGroupedTable.vue';
 import TimeEntryMassActionRow from './TimeEntry/TimeEntryMassActionRow.vue';
 import TimeEntryCreateModal from './TimeEntry/TimeEntryCreateModal.vue';
 import TimeEntryEditModal from './TimeEntry/TimeEntryEditModal.vue';
-import MoreOptionsDropdown from './MoreOptionsDropdown.vue';
+
 import FullCalendarEventContent from './FullCalendar/FullCalendarEventContent.vue';
 import FullCalendarDayHeader from './FullCalendar/FullCalendarDayHeader.vue';
 import TimeEntryCalendar from './FullCalendar/TimeEntryCalendar.vue';
+import CalendarSettingsPopover from './FullCalendar/CalendarSettingsPopover.vue';
+import DateRangePicker from './Input/DateRangePicker.vue';
+import TimezoneMismatchModal from './TimezoneMismatchModal.vue';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip/index';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion/index';
+import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from './popover/index';
+import { RangeCalendar } from './range-calendar/index';
+import { CommandPalette } from './CommandPalette/index';
+import { Separator } from './separator/index';
+import {
+    Field,
+    FieldContent,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+    FieldLegend,
+    FieldSeparator,
+    FieldSet,
+    FieldTitle,
+    fieldVariants,
+} from './field/index';
+export type { FieldVariants } from './field/index';
 export type { ActivityPeriod } from './FullCalendar/idleStatusPlugin';
+export type { CalendarSettings } from './FullCalendar/calendarSettings';
+export type {
+    CommandPaletteCommand,
+    CommandPaletteGroup,
+    EntitySearchResult,
+} from './CommandPalette/index';
 
 export {
     money,
@@ -58,19 +85,42 @@ export {
     TimeTrackerControls,
     TimeTrackerMoreOptionsDropdown,
     CardTitle,
-    SelectDropdown,
     Badge,
     Checkbox,
     TimeEntryGroupedTable,
     TimeEntryMassActionRow,
-    MoreOptionsDropdown,
     TimeEntryCreateModal,
     TimeEntryEditModal,
     FullCalendarEventContent,
     FullCalendarDayHeader,
     TimeEntryCalendar,
+    CalendarSettingsPopover,
+    DateRangePicker,
+    TimezoneMismatchModal,
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+    PopoverAnchor,
+    RangeCalendar,
+    CommandPalette,
+    Separator,
+    Field,
+    FieldContent,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+    FieldLegend,
+    FieldSeparator,
+    FieldSet,
+    FieldTitle,
+    fieldVariants,
 };

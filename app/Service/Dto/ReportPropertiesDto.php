@@ -8,6 +8,7 @@ use App\Enums\TimeEntryAggregationType;
 use App\Enums\TimeEntryAggregationTypeInterval;
 use App\Enums\TimeEntryRoundingType;
 use App\Enums\Weekday;
+use App\Service\TimeEntryFilter;
 use Illuminate\Contracts\Database\Eloquent\Castable;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
@@ -106,8 +107,8 @@ class ReportPropertiesDto implements Castable
                     }
                 }
                 $dto = new ReportPropertiesDto;
-                $dto->end = $data->end !== null ? Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $data->end) : null;
-                $dto->start = $data->start !== null ? Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $data->start) : null;
+                $dto->end = $data->end !== null ? Carbon::parse($data->end, 'UTC') : null;
+                $dto->start = $data->start !== null ? Carbon::parse($data->start, 'UTC') : null;
                 $dto->active = $data->active;
                 $dto->memberIds = $data->memberIds !== null ? ReportPropertiesDto::idArrayToCollection($data->memberIds) : null;
                 $dto->billable = $data->billable;
@@ -174,7 +175,7 @@ class ReportPropertiesDto implements Castable
             if (! is_string($id)) {
                 throw new \InvalidArgumentException('The given ID is not a string');
             }
-            if (! Str::isUuid($id)) {
+            if ($id !== TimeEntryFilter::NONE_VALUE && ! Str::isUuid($id)) {
                 throw new \InvalidArgumentException('The given ID is not a valid UUID');
             }
             $collection->push($id);

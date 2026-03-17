@@ -11,7 +11,7 @@ defineProps<{
 </script>
 
 <template>
-    <Link :href="href" class="block group">
+    <Link :href="href" class="block group" prefetch>
         <div
             :class="[
                 current

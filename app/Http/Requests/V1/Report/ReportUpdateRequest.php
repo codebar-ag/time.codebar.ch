@@ -60,6 +60,6 @@ class ReportUpdateRequest extends BaseFormRequest
     {
         $publicUntil = $this->input('public_until');
 
-        return $publicUntil === null ? null : Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $publicUntil);
+        return $publicUntil === null ? null : Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $publicUntil, 'UTC');
     }
 }

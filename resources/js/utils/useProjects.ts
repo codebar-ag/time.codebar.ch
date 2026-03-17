@@ -52,7 +52,23 @@ export const useProjectsStore = defineStore('projects', () => {
         }
     }
 
-    // Delete disabled intentionally
+    async function deleteProject(projectId: string) {
+        const organizationId = getCurrentOrganizationId();
+        if (organizationId) {
+            await handleApiRequestNotifications(
+                () =>
+                    api.deleteProject(undefined, {
+                        params: {
+                            organization: organizationId,
+                            project: projectId,
+                        },
+                    }),
+                'Project deleted successfully',
+                'Failed to delete project'
+            );
+            await fetchProjects();
+        }
+    }
 
     async function updateProject(projectId: string, updateProjectBody: UpdateProjectBody) {
         const organizationId = getCurrentOrganizationId();
@@ -78,6 +94,7 @@ export const useProjectsStore = defineStore('projects', () => {
         projects,
         fetchProjects,
         createProject,
+        deleteProject,
         updateProject,
     };
 });

@@ -13,12 +13,14 @@ use App\Http\Resources\V1\Project\ProjectCollection;
 use App\Http\Resources\V1\Project\ProjectResource;
 use App\Models\Organization;
 use App\Models\Project;
+use App\Models\ProjectMember;
 use App\Models\TimeEntry;
 use App\Service\BillableRateService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller
 {
@@ -46,8 +48,7 @@ class ProjectController extends Controller
         $user = $this->user();
 
         $projectsQuery = Project::query()
-            ->whereBelongsTo($organization, 'organization')
-            ->orderBy('name');
+            ->whereBelongsTo($organization, 'organization');
 
         if (! $canViewAllProjects) {
             $projectsQuery->visibleByEmployee($user);
@@ -59,7 +60,9 @@ class ProjectController extends Controller
             $projectsQuery->whereNull('archived_at');
         }
 
-        $projects = $projectsQuery->paginate(config('app.pagination_per_page_default'));
+        $projects = $projectsQuery
+            ->orderBy('created_at', 'desc')
+            ->paginate(config('app.pagination_per_page_default'));
 
         $showBillableRate = $this->member($organization)->role !== Role::Employee->value || $organization->employees_can_see_billable_rates;
 
@@ -166,7 +169,22 @@ class ProjectController extends Controller
     {
         $this->checkPermission($organization, 'projects:delete', $project);
 
-        // Deletion disabled: return early to keep data intact
-        return response()->json(['message' => 'Project deletion disabled'], 200);
+        if ($project->tasks()->exists()) {
+            throw new EntityStillInUseApiException('project', 'task');
+        }
+        if ($project->timeEntries()->exists()) {
+            throw new EntityStillInUseApiException('project', 'time_entry');
+        }
+
+        DB::transaction(function () use (&$project): void {
+            $project->members->each(function (ProjectMember $member): void {
+                $member->delete();
+            });
+
+            $project->delete();
+        });
+
+        return response()
+            ->json(null, 204);
     }
 }

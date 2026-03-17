@@ -2,9 +2,9 @@
 import ProjectMoreOptionsDropdown from '@/Components/Common/Project/ProjectMoreOptionsDropdown.vue';
 import type { Project } from '@/packages/api/src';
 import { computed, ref, inject, type ComputedRef } from 'vue';
-import { useClientsStore } from '@/utils/useClients';
-import { storeToRefs } from 'pinia';
-import { useTasksStore } from '@/utils/useTasks';
+import { CheckCircleIcon, ArchiveBoxIcon } from '@heroicons/vue/24/outline';
+import { useClientsQuery } from '@/utils/useClientsQuery';
+import { useTasksQuery } from '@/utils/useTasksQuery';
 import { useProjectsStore } from '@/utils/useProjects';
 import TableRow from '@/Components/TableRow.vue';
 import ProjectEditModal from '@/Components/Common/Project/ProjectEditModal.vue';
@@ -16,8 +16,8 @@ import { formatHumanReadableDuration } from '../../../packages/ui/src/utils/time
 import { isAllowedToPerformPremiumAction } from '@/utils/billing';
 import type { Organization } from '@/packages/api/src';
 
-const { clients } = storeToRefs(useClientsStore());
-const { tasks } = storeToRefs(useTasksStore());
+const { clients } = useClientsQuery();
+const { tasks } = useTasksQuery();
 
 const props = defineProps<{
     project: Project;
@@ -32,7 +32,9 @@ const projectTasksCount = computed(() => {
     return tasks.value.filter((task) => task.project_id === props.project.id).length;
 });
 
-// Delete disabled intentionally
+function deleteProject() {
+    useProjectsStore().deleteProject(props.project.id);
+}
 
 function archiveProject() {
     useProjectsStore().updateProject(props.project.id, {
@@ -43,7 +45,7 @@ function archiveProject() {
 
 const organization = inject<ComputedRef<Organization>>('organization');
 
-const _billableRateInfo = computed(() => {
+const billableRateInfo = computed(() => {
     if (props.project.is_billable) {
         if (props.project.billable_rate) {
             return formatCents(
@@ -69,7 +71,7 @@ const showEditProjectModal = ref(false);
         :original-project="project"></ProjectEditModal>
     <TableRow :href="route('projects.show', { project: project.id })">
         <div
-            class="whitespace-nowrap flex items-center space-x-3 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
+            class="whitespace-nowrap min-w-0 flex items-center space-x-5 3xl:pl-12 py-4 pr-3 text-sm font-medium text-text-primary pl-4 sm:pl-6 lg:pl-8">
             <div
                 :style="{
                     backgroundColor: project.color,
@@ -81,7 +83,7 @@ const showEditProjectModal = ref(false);
             </span>
             <span class="text-text-secondary"> {{ projectTasksCount }} Tasks </span>
         </div>
-        <div class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
+        <div class="whitespace-nowrap min-w-0 px-3 py-4 text-sm text-text-secondary">
             <div v-if="project.client_id" class="overflow-ellipsis overflow-hidden">
                 {{ client?.name }}
             </div>
@@ -107,12 +109,27 @@ const showEditProjectModal = ref(false);
                 :current="project.spent_time"></EstimatedTimeProgress>
             <span v-else> -- </span>
         </div>
-        <div></div>
-
+        <div
+            v-if="showBillableRate"
+            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary">
+            {{ billableRateInfo }}
+        </div>
+        <div
+            class="whitespace-nowrap px-3 py-4 text-sm text-text-secondary flex space-x-1.5 items-center font-medium">
+            <template v-if="project.is_archived">
+                <ArchiveBoxIcon class="w-4 text-icon-default"></ArchiveBoxIcon>
+                <span>Archived</span>
+            </template>
+            <template v-else>
+                <CheckCircleIcon class="w-4 text-icon-default"></CheckCircleIcon>
+                <span>Active</span>
+            </template>
+        </div>
         <div
             class="relative whitespace-nowrap flex items-center pl-3 text-right text-sm font-medium pr-4 sm:pr-6 lg:pr-8 3xl:pr-12">
             <ProjectMoreOptionsDropdown
                 :project="project"
+                @delete="deleteProject"
                 @edit="showEditProjectModal = true"
                 @archive="archiveProject"></ProjectMoreOptionsDropdown>
         </div>
