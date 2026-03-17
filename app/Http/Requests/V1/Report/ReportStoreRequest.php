@@ -193,8 +193,7 @@ class ReportStoreRequest extends BaseFormRequest
     {
         $publicUntil = $this->input('public_until');
 
-        return $publicUntil === null ? null : Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $publicUntil, 'UTC')
-            ->setTimezone(config('app.timezone'));
+        return $publicUntil === null ? null : Carbon::createFromFormat('Y-m-d\TH:i:s\Z', $publicUntil, 'UTC');
     }
 
     public function getPropertyStart(): Carbon
