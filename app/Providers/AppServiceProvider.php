@@ -31,6 +31,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -39,7 +40,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Ignore malformed _method / X-HTTP-Method-Override values (bots) instead of throwing SuspiciousOperationException.
+        SymfonyRequest::setAllowedHttpMethodOverride(['PUT', 'PATCH', 'DELETE']);
     }
 
     /**
