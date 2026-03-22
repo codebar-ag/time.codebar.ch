@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\Weekday;
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\User;
 use App\Service\TimezoneService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -49,5 +50,24 @@ class ProfileInformationTest extends TestCase
         $this->assertEquals('test@example.com', $user->email);
         $this->assertEquals($timezone, $user->timezone);
         $this->assertEquals(Weekday::Sunday, $user->week_start);
+    }
+
+    public function test_profile_information_can_be_updated_via_post_with_method_spoofing(): void
+    {
+        $user = User::factory()->create();
+        $timezone = app(TimezoneService::class)->getTimezones()[0];
+        $this->actingAs($user);
+
+        $response = $this->withoutMiddleware(VerifyCsrfToken::class)
+            ->post('/user/profile-information', [
+                '_method' => 'PUT',
+                'name' => 'Spoofed Put Name',
+                'email' => $user->email,
+                'timezone' => $timezone,
+                'week_start' => Weekday::Sunday->value,
+            ]);
+
+        $response->assertValid(errorBag: 'updateProfileInformation');
+        $this->assertSame('Spoofed Put Name', $user->fresh()->name);
     }
 }
