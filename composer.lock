@@ -2880,16 +2880,16 @@
         },
         {
             "name": "gotenberg/gotenberg-php",
-            "version": "v2.17.0",
+            "version": "v2.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/gotenberg/gotenberg-php.git",
-                "reference": "7e6b574fb500d35584c29159c0559e834e71d99d"
+                "reference": "d2e4ada726370a54fdf57963c5ee17970a60b8e4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/gotenberg/gotenberg-php/zipball/7e6b574fb500d35584c29159c0559e834e71d99d",
-                "reference": "7e6b574fb500d35584c29159c0559e834e71d99d",
+                "url": "https://api.github.com/repos/gotenberg/gotenberg-php/zipball/d2e4ada726370a54fdf57963c5ee17970a60b8e4",
+                "reference": "d2e4ada726370a54fdf57963c5ee17970a60b8e4",
                 "shasum": ""
             },
             "require": {
@@ -2949,7 +2949,7 @@
             ],
             "support": {
                 "issues": "https://github.com/gotenberg/gotenberg-php/issues",
-                "source": "https://github.com/gotenberg/gotenberg-php/tree/v2.17.0"
+                "source": "https://github.com/gotenberg/gotenberg-php/tree/v2.18.0"
             },
             "funding": [
                 {
@@ -2957,7 +2957,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-22T17:01:55+00:00"
+            "time": "2026-03-19T19:54:36+00:00"
         },
         {
             "name": "graham-campbell/result-type",
